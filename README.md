@@ -1,9 +1,10 @@
 # Softwear
 
-Softwear is a real-time virtual try-on platform built with React, Three.js, and Mediapipe.  
-It uses live camera input to map user body motion, apply digital clothing models, and simulate realistic drape and movement in 3D.
+Softwear is a real-time virtual try-on platform built with React, Three.js, and Mediapipe. It uses live camera input to map user body motion, apply digital clothing models, and simulate realistic drape and movement in 3D.
 
 ---
+### Check out the Live Demo:
+## [https://softwear.techangelx.com](https://softwear.techangelx.com)
 
 ## Overview
 ![Screenshot](readme_images/screenshot1.png)
