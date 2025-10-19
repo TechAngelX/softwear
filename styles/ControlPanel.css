@@ -1,0 +1,81 @@
+/* styles/ControlPanel.css */
+.controls-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.btn-control {
+    padding: 14px 10px;
+    border-radius: var(--border-radius);
+    font-size: 0.85rem;
+    font-weight: 590;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: var(--border-light);
+    background-color: var(--surface-light);
+    color: var(--on-surface);
+    letter-spacing: -0.01em;
+}
+
+.btn-control:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-1);
+}
+
+.btn-success {
+    background-color: #4caf50;
+    color: white;
+    border: 1px solid #43a047;
+    font-weight: 600;
+}
+
+.btn-success:hover {
+    background-color: #43a047;
+}
+
+.btn-danger {
+    background-color: #f44336;
+    color: white;
+    border: 1px solid #e53935;
+    font-weight: 600;
+}
+
+.btn-danger:hover {
+    background-color: #e53935;
+}
+
+.btn-outline {
+    background-color: var(--surface-light);
+    border: var(--border-light);
+    color: var(--on-surface);
+}
+
+.btn-outline:hover {
+    background-color: rgba(187, 134, 252, 0.1);
+}
+
+.btn-outline-active {
+    background-color: rgba(187, 134, 252, 0.15);
+    border-color: var(--primary);
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.background-controls {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 767px) {
+    .controls-grid {
+        grid-template-columns: 1fr;
+    }
+    .background-controls {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

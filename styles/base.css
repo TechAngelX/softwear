@@ -1,0 +1,38 @@
+/* /styles/base.css */
+
+:root {
+    --primary: #bb86fc;
+    --primary-dark: #3700b3;
+    --secondary: #03dac6;
+    --background: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface-light: #252525;
+    --error: #cf6679;
+    --on-primary: #ffffff;
+    --on-secondary: #000000;
+    --on-background: #ffffff;
+    --on-surface: #e1e1e1;
+    --on-error: #000000;
+    --border-radius: 6px;
+    --shadow-1: 0 2px 8px rgba(0,0,0,0.6);
+    --shadow-2: 0 4px 16px rgba(0,0,0,0.7);
+    --shadow-glow: 0 0 12px rgba(187, 134, 252, 0.25);
+    --transition: all 0.2s ease;
+    --border-light: 1px solid rgba(255,255,255,0.12);
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+    background-color: var(--background);
+    color: var(--on-background);
+    line-height: 1.5;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-image:
+            linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+    background-size: 24px 24px;
+}

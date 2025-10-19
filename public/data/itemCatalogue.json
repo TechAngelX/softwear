@@ -1,0 +1,526 @@
+{
+  "items": {
+    "male": {
+      "basicTee": {
+        "name": "NK Sport Raglan Basic",
+        "price": "£27.99",
+        "color": "Light Blue / White",
+        "material": "75% Polyester / 25% Cotton",
+        "sku": "NS-38104",
+        "description": "A sporty essential for any wardrobe. This raglan sleeve t-shirt combines a classic athletic look with a soft polyester-cotton blend for ultimate comfort during any activity. Perfect for the gym or casual wear.",
+        "modelPath": "./3dmodels/men/tshirts/basictee/basictee.glb",
+        "modelPathMobile": "./3dmodels/men/tshirts/basictee/basictee_mob.glb"
+      },
+      "birkbeckTee": {
+        "name": "Birkbeck Raglan T-Shirt",
+        "price": "£19.99",
+        "color": "Burgundy/Black",
+        "material": "100% Polyester",
+        "sku": "BR-25749",
+        "description": "Show your university pride with this official Birkbeck raglan t-shirt. Crafted from durable, breathable polyester, it's perfect for lectures, sporting events, or casual campus life.",
+        "modelPath": "./3dmodels/men/tshirts/birkbecktee/birkbecktee.glb",
+        "modelPathMobile": "./3dmodels/men/tshirts/birkbecktee/birkbecktee_mob.glb"
+      },
+      "soccerTee": {
+        "name": "Arsenal 2025/26 Home t-Shirt",
+        "price": "£49.99",
+        "color": "Red / White",
+        "material": "Polyester",
+        "sku": "AH-58219",
+        "description": "Support the Gunners in style with the official Arsenal 2025/26 home shirt. Engineered from lightweight performance polyester, it features the iconic red and white colours, ensuring you stay cool and comfortable on or off the pitch.",
+        "modelPath": "./3dmodels/men/tshirts/soccertee/soccertee.glb",
+        "modelPathMobile": "./3dmodels/men/tshirts/soccertee/soccertee_mob.glb"
+      },
+      "poloTee": {
+        "name": "Ralph Lauren Tri-Colour Polo",
+        "price": "£139.99",
+        "color": "Multi (White / Red / Blue / Navy)",
+        "material": "Piqué Cotton",
+        "sku": "RL-83015",
+        "description": "A timeless classic from Ralph Lauren. This polo is crafted from premium piqué cotton and features a bold tri-colour design. A sophisticated choice for smart-casual occasions, offering both iconic style and exceptional comfort.",
+        "modelPath": "./3dmodels/men/tshirts/polotee/polotee.glb",
+        "modelPathMobile": "./3dmodels/men/tshirts/polotee/polotee_mob.glb"
+      },
+      "pufferJacket": {
+        "name": "Puffer Jacket",
+        "price": "£89.99",
+        "color": "Yellow",
+        "material": "Nylon",
+        "sku": "PJ-74920",
+        "description": "Stay warm without the weight in this essential yellow puffer jacket. Its durable nylon shell and insulated padding provide excellent protection against the cold, making it a bright and practical choice for any winter outing.",
+        "modelPath": "./3dmodels/men/jacketsm/puffajacket/puffajacket.glb",
+        "modelPathMobile": "./3dmodels/men/jacketsm/puffajacket/puffajacket_mob.glb"
+      },
+      "leatherJacket": {
+        "name": "Schott NYC Leather JKT",
+        "price": "£149.99",
+        "color": "Black",
+        "material": "Leather",
+        "sku": "SN-69381",
+        "description": "Embrace a timeless rebel style with the iconic Schott NYC leather jacket. Crafted from genuine black leather, this jacket offers a rugged yet sophisticated look that improves with age. An essential piece for any modern wardrobe.",
+        "modelPath": "./3dmodels/men/jacketsm/leatherjacket/leatherjacket.glb",
+        "modelPathMobile": "./3dmodels/men/jacketsm/leatherjacket/leatherjacket_mob.glb"
+      },
+      "baseballJacket": {
+        "name": "Varsity Baseball JKT",
+        "price": "£49.99",
+        "color": "Red",
+        "material": "Polyester",
+        "sku": "VB-48264",
+        "description": "Capture the classic collegiate spirit with this varsity baseball jacket. Featuring contrasting sleeves and a comfortable polyester construction, it's the perfect statement piece for a relaxed, athletic-inspired look.",
+        "modelPath": "./3dmodels/men/jacketsm/baseballjacket/baseballjacket.glb",
+        "modelPathMobile": "./3dmodels/men/jacketsm/baseballjacket/baseballjacket_mob.glb"
+      },
+      "suitJacket": {
+        "name": "Suit Jacket",
+        "price": "£199.99",
+        "color": "Black",
+        "material": "Wool",
+        "sku": "SJ-91038",
+        "description": "Elevate your formalwear with this impeccably tailored black suit jacket. Crafted from fine wool for a sharp silhouette, it features a classic two-button design, perfect for business meetings or special occasions.",
+        "modelPath": "./3dmodels/men/jacketsm/suitjacket/suitjacket.glb",
+        "modelPathMobile": "./3dmodels/men/jacketsm/suitjacket/suitjacket_mob.glb"
+      },
+      "wayfarerSunglasses": {
+        "name": "Ray-Ban Wayfarers",
+        "price": "£149.99",
+        "color": "Black/Blue Mirror",
+        "material": "Acetate Frame",
+        "sku": "RW-28401",
+        "headType": "glasses",
+        "description": "The definitive style icon. These genuine Ray-Ban Wayfarers feature a classic black acetate frame paired with modern blue mirror lenses, offering timeless style and complete UV protection for any occasion.",
+        "modelPath": "./3dmodels/men/accs/wayfarersunglasses/wayfarersunglasses.glb",
+        "modelPathMobile": "./3dmodels/men/accs/wayfarersunglasses/wayfarersunglasses_mob.glb"
+      },
+      "baseballCap": {
+        "name": "Avirex Baseball Cap",
+        "price": "£19.99",
+        "color": "Green",
+        "material": "Acrylic",
+        "sku": "BC-10754",
+        "headType": "hat",
+        "description": "Top off your casual look with this Avirex baseball cap. Made from durable acrylic in a versatile green, it's the perfect accessory for a relaxed, streetwear-inspired style.",
+        "modelPath": "./3dmodels/men/accs/baseballcap/baseballcap.glb",
+        "modelPathMobile": "./3dmodels/men/accs/baseballcap/baseballcap_mob.glb"
+      },
+      "aviatorSunglasses": {
+        "name": "Rayban Aviators",
+        "price": "£89.99",
+        "color": "Black/Silver",
+        "material": "Metal Frame",
+        "sku": "RA-84620",
+        "headType": "glasses",
+        "description": "Originally designed for pilots, these classic Ray-Ban Aviators offer an iconic look with a lightweight black and silver metal frame. A perfect blend of function and style for a sharp, sophisticated edge.",
+        "modelPath": "./3dmodels/men/accs/aviatorsunglasses/aviatorsunglasses.glb",
+        "modelPathMobile": "./3dmodels/men/accs/aviatorsunglasses/aviatorsunglasses_mob.glb"
+      },
+
+      "bucketHat": {
+        "name": "Carhartt 'Go Fishing!' Bucket Hat",
+        "price": "£24.99",
+        "color": "Light Blue / Navy / White",
+        "material": "Cotton Canvas",
+        "sku": "CH-92847",
+        "headType": "hat",
+        "description": "A classic fishing bucket hat from Carhartt featuring a light blue crown with navy and white accent stripes. The wide brim provides excellent sun protection, while the durable cotton canvas construction ensures long-lasting wear for outdoor adventures.",
+        "modelPath": "./3dmodels/men/accs/buckethat/buckethat.glb",
+        "modelPathMobile": "./3dmodels/men/accs/buckethat/buckethat_mob.glb"
+      },
+      
+      
+      "beanieHat": {
+        "name": "Winter Striped Beanie",
+        "price": "£12.99",
+        "color": "Red / Grey / Charcoal",
+        "material": "100% Acrylic Knit",
+        "sku": "WB-42183",
+        "headType": "hat",
+        "description": "A classic ribbed knit beanie featuring bold horizontal stripes in red, grey, and charcoal with a distinctive pom-pom detail. The traditional fold-over cuff design provides extra warmth and a timeless casual style perfect for cold weather.",
+        "modelPath": "./3dmodels/men/accs/beaniehat/beaniehat.glb",
+        "modelPathMobile": "./3dmodels/men/accs/beaniehat/beaniehat_mob.glb"
+      },
+
+      "fedoraHat": {
+        "name": "Classic 'IndieJones' Fedora",
+        "price": "£45.99",
+        "color": "Tan / Brown",
+        "material": "100% Wool Felt",
+        "sku": "CF-73291",
+        "headType": "hat",
+        "description": "A timeless wool felt fedora that brings out the archeologist in you. Featuring a classic teardrop crown with center crease and traditional brown leather hatband.",
+        "modelPath": "./3dmodels/men/accs/fedorahat/fedorahat.glb",
+        "modelPathMobile": "./3dmodels/men/accs/fedorahat/fedorahat_mob.glb"
+      },
+      
+      "nycardiganTop": {
+        "name": "NY Winter Cardigan",
+        "price": "£59.99",
+        "color": "Burgundy / Light Grey",
+        "material": "100% Cashmere Wool",
+        "sku": "NW-75928",
+        "description": "Experience luxurious warmth with this New York-inspired winter cardigan. Made from 100% pure cashmere wool, its rich burgundy and grey tones create a sophisticated layering piece for the colder months.",
+        "modelPath": "./3dmodels/men/upper/nycardigantop/nycardigantop.glb",
+        "modelPathMobile": "./3dmodels/men/upper/nycardigantop/nycardigantop_mob.glb"
+      },
+      "smartShirtTop": {
+        "name": "Smart Shirt",
+        "price": "£45.00",
+        "color": "White",
+        "material": "Cotton",
+        "sku": "SS-48261",
+        "description": "A cornerstone of any smart wardrobe. This crisp white shirt is tailored from breathable cotton for a sharp, comfortable fit. An essential piece for professional settings or formal events.",
+        "modelPath": "./3dmodels/men/upper/smartshirttop/smartshirttop.glb",
+        "modelPathMobile": "./3dmodels/men/upper/smartshirttop/smartshirttop_mob.glb"
+      },
+      "casualTop": {
+        "name": "Sports Casual Fit Jumper",
+        "price": "£469.00",
+        "color": "Red / White / Blue",
+        "material": "65% Knit Polyester / 35% Cotton",
+        "sku": "SF-93857",
+        "description": "A bold statement piece for your casual collection. This jumper features a striking colour-block design in red, white, and blue, crafted from a comfortable knit blend for a relaxed, sporty fit.",
+        "modelPath": "./3dmodels/men/upper/casualtop/casualtop.glb",
+        "modelPathMobile": "./3dmodels/men/upper/casualtop/casualtop_mob.glb"
+      },
+      "woolvestTop": {
+        "name": "Lyle & Scott Premium Waistcoat",
+        "price": "£75.00",
+        "color": "Blue / Yellow",
+        "material": "100% Cashmere Wool",
+        "sku": "LS-28164",
+        "description": "Add a touch of heritage style with this premium waistcoat from Lyle & Scott. Woven from luxurious cashmere wool in a distinctive blue and yellow pattern, it's the perfect layer for a smart, refined look.",
+        "modelPath": "./3dmodels/men/upper/woolvesttop/woolvesttop.glb",
+        "modelPathMobile": "./3dmodels/men/upper/woolvesttop/woolvesttop_mob.glb"
+      }
+    },
+    "female": {
+      "skylineCropTee": {
+        "name": "Skyline Crop Tee",
+        "price": "£27.99",
+        "color": "Light Blue / White",
+        "material": "75% Polyester / 25% Cotton",
+        "sku": "SCT-98765",
+        "description": "A fresh and modern V-neck t-shirt with contrasting white sleeves and a comfortable, cropped fit. Perfect for a relaxed, sporty look.",
+        "modelPath": "./3dmodels/women/tops/skylinecroptee/skylinecroptee.glb",
+        "modelPathMobile": "./3dmodels/women/tops/skylinecroptee/skylinecroptee_mob.glb"
+      },
+      "sunflowerTee": {
+        "name": "Sunray T-Shirt",
+        "price": "£25.00",
+        "color": "White / Yellow / Pink",
+        "material": "Organic Cotton",
+        "sku": "SF-93857",
+        "description": "A vibrant graphic tee featuring a minimalist sunflower design. Crafted from certified organic cotton for superior comfort and a soft feel. The relaxed fit and ribbed crew neck make it an ideal choice for everyday wear.",
+        "modelPath": "./3dmodels/women/tops/sunflowertee/sunflowertee.glb",
+        "modelPathMobile": "./3dmodels/women/tops/sunflowertee/sunflowertee_mob.glb"
+      },
+      "cableKnitJumper": {
+        "name": "Heritage Cable Knit Jumper",
+        "price": "£85.00",
+        "color": "Sage Green / Charcoal",
+        "material": "100% Pure Wool",
+        "sku": "HCK-42851",
+        "description": "A beautifully crafted cable knit jumper featuring intricate traditional patterns and contrasting charcoal collar detail. The ribbed texture and decorative cable work showcase classic knitwear artistry, while the soft wool construction provides warmth and comfort for cooler days.",
+        "modelPath": "./3dmodels/women/tops/cableknitjumper/cableknitjumper.glb",
+        "modelPathMobile": "./3dmodels/women/tops/cableknitjumper/cableknitjumper_mob.glb"
+      },
+      "oxfordBlouse": {
+        "name": "Classic Oxford Shirt",
+        "price": "£65.00",
+        "color": "Light Blue",
+        "material": "100% Cotton Oxford",
+        "sku": "CDS-71942",
+        "description": "A timeless wardrobe essential featuring a crisp collar and clean lines. This light blue oxford shirt is crafted from premium cotton for breathability and comfort. The relaxed fit and button-down design make it perfect for both professional settings and casual styling.",
+        "modelPath": "./3dmodels/women/tops/oxfordBlouse/oxfordBlouse.glb",
+        "modelPathMobile": "./3dmodels/women/tops/oxfordBlouse/oxfordBlouse_mob.glb"
+      },
+      "sportie": {
+        "name": "Sportie Baseball Gear",
+        "price": "£79.99",
+        "color": "Royal Blue / White",
+        "material": "100% Polyester Mesh",
+        "sku": "SBG-29100",
+        "description": "Complete athletic training set featuring a sleeveless jersey with contrast trim and matching shorts. The moisture-wicking polyester mesh fabric keeps you cool during workouts, while the classic cut ensures unrestricted movement for all sporting activities.",
+        "modelPath": "./3dmodels/women/outfits/sportie/sportsoutfit.glb",
+        "modelPathMobile": "./3dmodels/women/outfits/sportie/sportsoutfit_mob.glb"
+      },
+      "azureDaydreamSet": {
+        "name": "Azure Daydream Set",
+        "price": "£89.99",
+        "color": "Light Blue / White",
+        "material": "Cotton/Polyester Blend",
+        "sku": "ST-38165",
+        "description": "A fresh and coordinated two-piece set featuring a light blue, adjustable tank top layered over a soft white t-shirt. The outfit is completed by a matching blue A-line skirt with a stylish black belt, creating a versatile and comfortable look.",
+        "modelPath": "./3dmodels/women/outfits/azure/azure.glb",
+        "modelPathMobile": "./3dmodels/women/outfits/azure/azure_mob.glb"
+      },
+      "athleticALineDress": {
+        "name": "Athletic A-Line Dress",
+        "price": "£95.00",
+        "color": "Sunshine Yellow / Lavender",
+        "material": "Cotton Piqué",
+        "sku": "AAD-84629",
+        "description": "A sporty yet feminine tennis-inspired dress featuring a classic polo collar and half-zip front. The sunshine yellow piqué fabric is accented with lavender trim at the collar and hemline stripes. The flattering A-line silhouette and three-quarter sleeves create a perfect blend of athletic elegance and preppy style.",
+        "modelPath": "./3dmodels/women/outfits/atldress/atldress.glb",
+        "modelPathMobile": "./3dmodels/women/outfits/atldress/atldress_mob.glb"
+      },
+      "mondrianDress": {
+        "name": "YSL Mondrian Dress",
+        "price": "£1,250.00",
+        "color": "Colour-Block",
+        "material": "Premium Cotton",
+        "sku": "YSL-1965-MD",
+        "description": "A timeless YSL design inspired by Piet Mondrian's iconic geometric patterns. This sleeveless A-line dress features bold color-block panels in primary hues, crafted from premium cotton for elegance and comfort.",
+        "modelPath": "./3dmodels/women/outfits/mondriandress/mondriandress.glb",
+        "modelPathMobile": "./3dmodels/women/outfits/mondriandress/mondriandress_mob.glb"
+      },
+      "pufferSki": {
+        "name": "Alpine Puffer Ski Jacket",
+        "price": "£110.00",
+        "color": "Sky Blue / Neon Yellow",
+        "material": "Recycled Nylon / Ribbed Knit",
+        "sku": "SPJ-55821",
+        "description": "This contemporary puffer jacket combines a vibrant sky-blue body with high-contrast neon-yellow details on the zipper, collar, and cuffs. Its insulated, quilted design provides warmth without the bulk, while the ribbed knit accents offer a comfortable fit and a modern, sporty look.",
+        "modelPath": "./3dmodels/women/jacketsf/pufferski/pufferski.glb",
+        "modelPathMobile": "./3dmodels/women/jacketsf/pufferski/pufferski_mob.glb"
+      },
+      "mintJacket": {
+        "name": "Mint Frost Jacket",
+        "price": "£145.00",
+        "color": "Mint Green / Pale Grey",
+        "material": "Wool Blend / Nylon",
+        "sku": "MF-78901",
+        "description": "A stylish, cropped-fit jacket in a refreshing mint and pale grey colour-block design. It features a high collar with a full-zip front and two large chest pockets. The blend of textures provides a modern, sophisticated look perfect for layering.",
+        "modelPath": "./3dmodels/women/jacketsf/mintjacket/mintjacket.glb",
+        "modelPathMobile": "./3dmodels/women/jacketsf/mintjacket/mintjacket_mob.glb"
+      },
+      "suedeBikerJacket": {
+        "name": "Purple Suede Biker Jacket",
+        "price": "£189.99",
+        "color": "Deep Purple / Tan",
+        "material": "100% Genuine Suede",
+        "sku": "SBJ-47293",
+        "description": "A luxurious take on the classic biker jacket silhouette. Crafted from premium suede with contrasting tan collar details and asymmetric zip closure. Features multiple zip pockets and a tailored fit that adds sophistication to any outfit.",
+        "modelPath": "./3dmodels/women/jacketsf/suedebikerjacket/suedebikerjacket.glb",
+        "modelPathMobile": "./3dmodels/women/jacketsf/suedebikerjacket/suedebikerjacket_mob.glb"
+      },
+      "regentTrenchCoat": {
+        "name": "Regent Trench Coat",
+        "price": "£249.99",
+        "color": "Khaki Beige",
+        "material": "Cotton Gabardine",
+        "sku": "RTC-55912",
+        "description": "A classic double-breasted trench coat featuring a wide collar, shoulder epaulets, and a tailored fit. The piece is cinched at the waist with a self-tie belt with D-ring details, offering a sophisticated and timeless silhouette.",
+        "modelPath": "./3dmodels/women/jacketsf/regenttrenchcoat/regenttrenchcoat.glb",
+        "modelPathMobile": "./3dmodels/women/jacketsf/regenttrenchcoat/regenttrenchcoat_mob.glb"
+      },
+      "yslChloeJacket": {
+        "name": "YSL 'Chloe' Crop Jacket",
+        "price": "£79.99",
+        "color": "Dusty Pink / Black",
+        "material": "Cotton Blend",
+        "sku": "YSL-82451",
+        "description": "A sweet and casual cropped jacket perfect for everyday wear. Features a classic collar design with contrasting black trim at the collar, cuffs, and hem. The front zip closure and chest pockets add practical details whilst maintaining a cute, relaxed silhouette.",
+        "modelPath": "./3dmodels/women/jacketsf/ysljacket/ysljacket.glb",
+        "modelPathMobile": "./3dmodels/women/jacketsf/ysljacket/ysljacket_mob.glb"
+      }
+    }
+  },
+  "categories": {
+    "male": [
+      {
+        "category": "T-Shirts",
+        "items": [
+          {
+            "id": "basicTee",
+            "name": "Basic T-Shirt",
+            "thumbnail": "3dmodels/men/tshirts/basictee/basictee.png"
+          },
+          {
+            "id": "birkbeckTee",
+            "name": "Birkbeck T-Shirt",
+            "thumbnail": "3dmodels/men/tshirts/birkbecktee/birkbecktee.png"
+          },
+          {
+            "id": "soccerTee",
+            "name": "Soccer T-Shirt",
+            "thumbnail": "3dmodels/men/tshirts/soccertee/soccertee.png"
+          },
+          {
+            "id": "poloTee",
+            "name": "Polo T-Shirt",
+            "thumbnail": "3dmodels/men/tshirts/polotee/polotee.png"
+          }
+        ]
+      },
+      {
+        "category": "Jackets",
+        "items": [
+          {
+            "id": "pufferJacket",
+            "name": "Puffer Jacket",
+            "thumbnail": "3dmodels/men/jacketsm/puffajacket/puffajacket.png"
+          },
+          {
+            "id": "leatherJacket",
+            "name": "Leather Jacket",
+            "thumbnail": "3dmodels/men/jacketsm/leatherjacket/leatherjacket.png"
+          },
+          {
+            "id": "baseballJacket",
+            "name": "Baseball Jacket",
+            "thumbnail": "3dmodels/men/jacketsm/baseballjacket/baseballjacket.png"
+          },
+          {
+            "id": "suitJacket",
+            "name": "Suit Jacket",
+            "thumbnail": "3dmodels/men/jacketsm/suitjacket/suitjacket.png"
+          }
+        ]
+      },
+      {
+        "category": "Accessories",
+        "items": [
+          {
+            "id": "wayfarerSunglasses",
+            "name": "Wayfarer Sunglasses",
+            "thumbnail": "3dmodels/men/accs/wayfarersunglasses/wayfarersunglasses.png"
+          },
+          {
+            "id": "baseballCap",
+            "name": "Avirex Baseball Cap",
+            "thumbnail": "3dmodels/men/accs/baseballcap/baseballcap.png"
+          },
+          {
+            "id": "aviatorSunglasses",
+            "name": "Aviator Sunglasses",
+            "thumbnail": "3dmodels/men/accs/aviatorsunglasses/aviatorsunglasses.png"
+          },
+
+                    {
+            "id": "bucketHat",
+            "name": "Carhartt Bucket Hat",
+            "thumbnail": "3dmodels/men/accs/buckethat/buckethat.png"
+          },
+          {
+            "id": "beanieHat",
+            "name": "Winter Striped Beanie",
+            "thumbnail": "3dmodels/men/accs/beaniehat/beaniehat.png"
+          },
+          {
+            "id": "fedoraHat",
+            "name": "Classic Fedora",
+            "thumbnail": "3dmodels/men/accs/fedorahat/fedorahat.png"
+          }
+        ]
+      },
+      {
+        "category": "Upper",
+        "items": [
+          {
+            "id": "nycardiganTop",
+            "name": "NY Cardigan",
+            "thumbnail": "3dmodels/men/upper/nycardigantop/nycardigantop.png"
+          },
+          {
+            "id": "smartShirtTop",
+            "name": "Smart Shirt",
+            "thumbnail": "3dmodels/men/upper/smartshirttop/smartshirttop.png"
+          },
+          {
+            "id": "casualTop",
+            "name": "Top",
+            "thumbnail": "3dmodels/men/upper/casualtop/casualtop.png"
+          },
+          {
+            "id": "woolvestTop",
+            "name": "Wool Vest",
+            "thumbnail": "3dmodels/men/upper/woolvesttop/woolvesttop.png"
+          }
+        ]
+      }
+    ],
+    "female": [
+      {
+        "category": "Tops",
+        "items": [
+          {
+            "id": "skylineCropTee",
+            "name": "Skyline Crop Tee",
+            "thumbnail": "3dmodels/women/tops/skylinecroptee/skylinecroptee.png"
+          },
+          {
+            "id": "sunflowerTee",
+            "name": "Sunray T-Shirt",
+            "thumbnail": "3dmodels/women/tops/sunflowertee/sunflowertee.png"
+          },
+          {
+            "id": "cableKnitJumper",
+            "name": "Heritage Cable Knit Jumper",
+            "thumbnail": "3dmodels/women/tops/cableknitjumper/cableknitjumper.png"
+          },
+          {
+            "id": "oxfordBlouse",
+            "name": "Classic Oxford Dress Shirt",
+            "thumbnail": "3dmodels/women/tops/oxfordBlouse/oxfordBlouse.png"
+          }
+        ]
+      },
+      {
+        "category": "Outfits",
+        "items": [
+          {
+            "id": "sportie",
+            "name": "Sportie Baseball Gear",
+            "thumbnail": "3dmodels/women/outfits/sportie/sportsoutfit.png"
+          },
+          {
+            "id": "azureDaydreamSet",
+            "name": "Azure Daydream Set",
+            "thumbnail": "3dmodels/women/outfits/azure/azure.png"
+          },
+          {
+            "id": "athleticALineDress",
+            "name": "Athletic A-Line Dress",
+            "thumbnail": "3dmodels/women/outfits/atldress/atldress.png"
+          },
+          {
+            "id": "mondrianDress",
+            "name": "Mondrian Dress",
+            "thumbnail": "3dmodels/women/outfits/mondriandress/mondriandress.png"
+          }
+        ]
+      },
+      {
+        "category": "Jackets",
+        "items": [
+          {
+            "id": "pufferSki",
+            "name": "Alpine Puffer Ski Jacket",
+            "thumbnail": "3dmodels/women/jacketsf/pufferski/pufferski.png"
+          },
+          {
+            "id": "suedeBikerJacket",
+            "name": "Purple Suede Biker Jacket",
+            "thumbnail": "3dmodels/women/jacketsf/suedebikerjacket/suedebikerjacket.png"
+          },
+          {
+            "id": "mintJacket",
+            "name": "Mint Frost Jacket",
+            "thumbnail": "3dmodels/women/jacketsf/mintjacket/mintjacket.png"
+          },
+          {
+            "id": "regentTrenchCoat",
+            "name": "Regent Trench Coat",
+            "thumbnail": "3dmodels/women/jacketsf/regenttrenchcoat/regenttrenchcoat.png"
+          },
+          {
+            "id": "yslChloeJacket",
+            "name": "YSL 'Chloe' Crop Jacket",
+            "thumbnail": "3dmodels/women/jacketsf/ysljacket/ysljacket.png"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,144 @@
+/* styles/responsive.css */
+
+@media (min-width: 768px) {
+    .tryon-content {
+        display: flex;
+        flex-direction: row;
+        gap: 1px;
+    }
+}
+
+@media (max-width: 768px) {
+    .app-header, .app-footer {
+        display: none;
+    }
+
+    .app-container {
+        padding: 0;
+    }
+
+    .control-sidebar {
+        width: 100%;
+        max-width: 100%;
+        top: auto;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: auto;
+        max-height: 50vh;
+        transform: translateY(100%);
+        border-top: var(--border-light);
+        border-left: none;
+        border-radius: 20px 20px 0 0;
+        padding-top: 40px;
+    }
+
+    .menu-toggle-btn {
+        top: auto;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1002;
+    }
+
+    .gender-toggle-container {
+        justify-content: center;
+    }
+
+    .gender-toggle-btn {
+        flex: 1;
+        min-width: auto;
+    }
+
+    .privacy-modal {
+        max-width: 95%;
+        margin: 20px;
+    }
+
+    .privacy-modal-content {
+        padding: 24px;
+    }
+
+    .privacy-modal-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .btn-privacy-close,
+    .btn-privacy-agree {
+        width: 100%;
+    }
+
+    .app-logo {
+        height: 50px;
+    }
+
+    .brand-label {
+        font-size: 0.7rem;
+    }
+
+    .welcome-logo {
+        height: 70px;
+        margin-bottom: 16px;
+    }
+
+    .welcome-subtitle {
+        font-size: 1rem;
+    }
+
+    .welcome-section {
+        padding: 24px 16px;
+        margin-bottom: 24px;
+    }
+
+    .privacy-policy-container {
+        padding: 16px;
+    }
+
+    .privacy-policy-header h1 {
+        font-size: 2rem;
+        margin-top: 40px;
+    }
+
+    .back-btn {
+        position: static;
+        margin-bottom: 20px;
+        width: auto;
+    }
+
+    .privacy-policy-content h2 {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .app-logo {
+        height: 45px;
+    }
+
+    .welcome-logo {
+        height: 60px;
+    }
+
+    .welcome-subtitle {
+        font-size: 0.9rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .gender-option,
+    .gender-card,
+    .gender-icon,
+    .selection-indicator,
+    .icon-glow {
+        transition: none;
+    }
+
+    .gender-option:hover {
+        transform: none;
+    }
+
+    .male-glow,
+    .female-glow {
+        animation: none;
+    }
+}

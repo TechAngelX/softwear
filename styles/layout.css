@@ -1,0 +1,77 @@
+/*main/styles/layout.css */
+
+.app-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+.app-header {
+    padding: 24px 0;
+    margin-bottom: 32px;
+    border-bottom: var(--border-light);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.app-footer {
+    margin-top: 32px;
+    padding: 16px 0;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.5);
+    border-top: var(--border-light);
+    letter-spacing: 0.01em;
+}
+
+.virtual-tryon-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    position: relative;
+}
+
+
+.welcome-section {
+    text-align: center;
+    margin-bottom: 32px;
+    padding: 32px 24px;
+    background: linear-gradient(135deg, rgba(187, 134, 252, 0.08), rgba(3, 218, 198, 0.08));
+    border-radius: 12px;
+    border: var(--border-light);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.welcome-logo {
+    height: 90px;
+    width: auto;
+    object-fit: contain;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 4px 16px rgba(187, 134, 252, 0.4));
+    animation: logoFloat 4s ease-in-out infinite;
+    transition: var(--transition);
+    opacity: 0;
+    animation: logoFadeIn 0.8s ease-out 0.3s forwards;
+}
+
+.welcome-logo:hover {
+    filter: drop-shadow(0 6px 20px rgba(187, 134, 252, 0.6));
+    transform: scale(1.05);
+    animation-play-state: paused;
+}
+
+.welcome-subtitle {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+    letter-spacing: 0.02em;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}

@@ -1,0 +1,110 @@
+## Build and output directories
+/dist/
+/build/
+/out/
+.cache/
+coverage/
+target/
+**/build/
+**/dist/
+nbbuild/
+nbdist/
+backend/venv/
+softwear-ap*
+
+# Package management (updated for packages structure)
+node_modules/
+packages/*/node_modules/
+.npm/
+.yarn/
+.gradle/
+.mvn/wrapper/maven-wrapper.jar
+.m2/
+
+# Logs and debug files
+*.log
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+
+
+# Environment and configuration
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+**/application-local.properties
+**/application-dev.properties
+.nonuploadable/
+nonuploadable/
+
+# IDE files
+# IntelliJ
+.idea/
+*.iml
+*.iws
+/shelf/
+.workspace.xml
+/dataSources/
+/dataSources.local.xml
+/httpRequests/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# NetBeans
+nbproject/
+*.nb-gradle
+
+# OS specific files
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Compiled files
+*.class
+*.jar
+*.war
+*.ear
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+*.bak
+
+# JavaFX specific
+**/fx.jar
+**/lib/jfxrt.jar
+/originalModel/
+/enterSlurm.sh
+/packages/trka/ssl/cert.pem
+/packages/shared/public/draco/gltf/draco_decoder.js
+/packages/shared/public/draco/draco_decoder.js
+/packages/shared/public/draco/gltf/draco_decoder.wasm
+/packages/shared/public/draco/draco_decoder.wasm
+/packages/shared/public/draco/gltf/draco_encoder.js
+/packages/shared/public/draco/draco_encoder.js
+/packages/shared/public/draco/draco_wasm_wrapper.js
+/packages/trka/ssl/key.pem
+/packages/shared/public/draco/gltf/draco_wasm_wrapper.js
+/packages/shared/public/draco/README.md
+/packages/main/ssl/cert.pem
+/packages/main/ssl/cert.conf
+/packages/main/docs/
+/packages/main/jsdocs/
+*.tar.gz
+/ssl/
+
+/softwearview.ps1
+/newkey.pem

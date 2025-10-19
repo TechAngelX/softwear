@@ -1,0 +1,574 @@
+/* styles/GarmentChooser.css */
+.on-screen-garment-chooser {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.garment-category-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 300px;
+    padding: 4px 8px;
+    background-color: rgba(26, 26, 26, 0.7);
+    border-radius: 99px;
+    border: var(--border-light);
+}
+
+.category-arrow-btn {
+    background: none;
+    border: none;
+    color: var(--on-surface);
+    font-size: 1.8rem;
+    cursor: pointer;
+    padding: 0 12px;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+
+.category-arrow-btn:hover {
+    color: var(--primary);
+}
+
+.garment-category-nav.confirmed {
+    border: 3px solid #ff6600;
+    animation: category-confirm-glow 0.8s ease-in-out forwards;
+}
+
+@keyframes category-confirm-glow {
+    0% {
+        box-shadow: 0 0 0px #ff6600;
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 10px #ff6600, 0 0 20px rgba(255, 102, 0, 0.5);
+        transform: scale(1.1);
+    }
+    100% {
+        box-shadow: 0 0 5px #ff6600, 0 0 10px rgba(255, 102, 0, 0.3);
+        transform: scale(1);
+    }
+}
+
+
+.category-name-display {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--on-surface);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.category-pills {
+    display: flex;
+    gap: 10px;
+    padding: 8px;
+    border-radius: 99px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.category-pill {
+    padding: 12px 16px;
+    border-radius: var(--border-radius);
+    border: var(--border-light);
+    background-color: var(--surface-light);
+    color: var(--on-surface);
+    font-size: 0.85rem;
+    font-weight: 590;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.category-pill:hover {
+    background-color: rgba(187, 134, 252, 0.1);
+    transform: translateY(-1px);
+}
+
+.category-pill.active {
+    background-color: rgba(187, 134, 252, 0.15);
+    color: var(--primary);
+    border-color: var(--primary);
+    box-shadow: var(--shadow-glow);
+    font-weight: 600;
+}
+
+.on-screen-garment-chooser .garment-items-container {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 10px;
+    width: 100%;
+    overflow-x: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.on-screen-garment-chooser .garment-items-container::-webkit-scrollbar {
+    display: none;
+}
+
+.garment-icon-btn {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 3px solid var(--surface-light);
+    background-color: var(--surface);
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    padding: 5px;
+    overflow: hidden;
+    box-shadow: var(--shadow-1);
+}
+
+.garment-icon-btn:hover {
+    transform: scale(1.08);
+    border-color: var(--primary);
+}
+
+.garment-icon-btn.selected {
+    border-color: var(--secondary);
+    transform: scale(1.15);
+    box-shadow: 0 0 20px rgba(3, 218, 198, 0.6);
+}
+
+.garment-icon-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+}
+
+.sidebar-garment-chooser {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
+
+.sidebar-garment-chooser .category-pills {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    background: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    flex-wrap: nowrap;
+    justify-content: stretch;
+}
+
+.sidebar-garment-chooser .garment-items-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+}
+
+.sidebar-garment-btn {
+    background-color: var(--surface-light);
+    border: var(--border-light);
+    border-radius: var(--border-radius);
+    padding: 12px 8px;
+    font-size: 0.8rem;
+    color: var(--on-surface);
+    text-align: center;
+    transition: var(--transition);
+    cursor: pointer;
+    font-weight: 590;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-garment-btn:hover {
+    background-color: rgba(187, 134, 252, 0.1);
+    transform: translateY(-1px);
+}
+
+.sidebar-garment-btn.active {
+    background-color: rgba(187, 134, 252, 0.15);
+    color: var(--primary);
+    border-color: var(--primary);
+    box-shadow: var(--shadow-glow);
+    font-weight: 600;
+}
+.on-screen-garment-chooser {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.garment-category-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 300px;
+    padding: 4px 8px;
+    background-color: rgba(26, 26, 26, 0.7);
+    border-radius: 99px;
+    border: var(--border-light);
+}
+
+.category-arrow-btn {
+    background: none;
+    border: none;
+    color: var(--on-surface);
+    font-size: 1.8rem;
+    cursor: pointer;
+    padding: 0 12px;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+
+.category-arrow-btn:hover {
+    color: var(--primary);
+}
+
+.garment-category-nav.confirmed {
+    border: 3px solid #ff6600;
+    animation: category-confirm-glow 0.8s ease-in-out forwards;
+}
+
+@keyframes category-confirm-glow {
+    0% {
+        box-shadow: 0 0 0px #ff6600;
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 10px #ff6600, 0 0 20px rgba(255, 102, 0, 0.5);
+        transform: scale(1.1);
+    }
+    100% {
+        box-shadow: 0 0 5px #ff6600, 0 0 10px rgba(255, 102, 0, 0.3);
+        transform: scale(1);
+    }
+}
+
+
+.category-name-display {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--on-surface);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.category-pills {
+    display: flex;
+    gap: 10px;
+    padding: 8px;
+    border-radius: 99px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.category-pill {
+    padding: 12px 16px;
+    border-radius: var(--border-radius);
+    border: var(--border-light);
+    background-color: var(--surface-light);
+    color: var(--on-surface);
+    font-size: 0.85rem;
+    font-weight: 590;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.category-pill:hover {
+    background-color: rgba(187, 134, 252, 0.1);
+    transform: translateY(-1px);
+}
+
+.category-pill.active {
+    background-color: rgba(187, 134, 252, 0.15);
+    color: var(--primary);
+    border-color: var(--primary);
+    box-shadow: var(--shadow-glow);
+    font-weight: 600;
+}
+
+.on-screen-garment-chooser .garment-items-container {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 10px;
+    width: 100%;
+    overflow-x: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.on-screen-garment-chooser .garment-items-container::-webkit-scrollbar {
+    display: none;
+}
+
+.garment-icon-btn {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 3px solid var(--surface-light);
+    background-color: var(--surface);
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    padding: 5px;
+    overflow: hidden;
+    box-shadow: var(--shadow-1);
+}
+
+.garment-icon-btn:hover {
+    transform: scale(1.08);
+    border-color: var(--primary);
+}
+
+.garment-icon-btn.selected {
+    border-color: var(--secondary);
+    transform: scale(1.15);
+    box-shadow: 0 0 20px rgba(3, 218, 198, 0.6);
+}
+
+.garment-icon-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+}
+
+.sidebar-garment-chooser {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
+
+.sidebar-garment-chooser .category-pills {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    background: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    flex-wrap: nowrap;
+    justify-content: stretch;
+}
+
+.sidebar-garment-chooser .garment-items-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+}
+
+.sidebar-garment-btn {
+    background-color: var(--surface-light);
+    border: var(--border-light);
+    border-radius: var(--border-radius);
+    padding: 12px 8px;
+    font-size: 0.8rem;
+    color: var(--on-surface);
+    text-align: center;
+    transition: var(--transition);
+    cursor: pointer;
+    font-weight: 590;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-garment-btn:hover {
+    background-color: rgba(187, 134, 252, 0.1);
+    transform: translateY(-1px);
+}
+
+.sidebar-garment-btn.active {
+    background-color: rgba(187, 134, 252, 0.15);
+    color: var(--primary);
+    border-color: var(--primary);
+    box-shadow: var(--shadow-glow);
+    font-weight: 600;
+}
+
+@media screen and (max-width: 768px) {
+    .garment-icon-btn {
+        width: 90px !important;
+        height: 90px !important;
+        padding: 10px !important;
+        border-width: 4px !important;
+        min-width: 90px !important;
+        flex-shrink: 0 !important;
+        touch-action: manipulation !important;
+        -webkit-tap-highlight-color: transparent !important;
+    }
+
+    .on-screen-garment-chooser .garment-items-container {
+        padding: 15px !important;
+        gap: 18px !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    .garment-category-nav {
+        padding: 8px 16px !important;
+        border-radius: 50px !important;
+        border-width: 3px !important;
+        min-height: 60px !important;
+        backdrop-filter: blur(15px) !important;
+        -webkit-backdrop-filter: blur(15px) !important;
+    }
+
+    .category-name-display {
+        font-size: 1.1rem !important;
+        font-weight: 700 !important;
+        padding: 0 10px !important;
+    }
+
+    .category-arrow-btn {
+        font-size: 2.2rem !important;
+        padding: 8px 16px !important;
+        min-width: 50px !important;
+        min-height: 50px !important;
+        border-radius: 50% !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+        border: 2px solid rgba(255, 255, 255, 0.2) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        touch-action: manipulation !important;
+    }
+
+    .category-arrow-btn:active {
+        transform: scale(0.95) !important;
+        background: rgba(255, 255, 255, 0.2) !important;
+    }
+}
+
+@media screen and (max-width: 414px) {
+    .garment-icon-btn {
+        width: 85px !important;
+        height: 85px !important;
+        min-width: 85px !important;
+    }
+
+    .on-screen-garment-chooser .garment-items-container {
+        gap: 15px !important;
+        padding: 12px !important;
+    }
+
+    .category-arrow-btn {
+        font-size: 2rem !important;
+        min-width: 45px !important;
+        min-height: 45px !important;
+        padding: 6px 14px !important;
+    }
+
+    .category-name-display {
+        font-size: 1rem !important;
+    }
+}
+
+@media screen and (max-width: 375px) {
+    .garment-icon-btn {
+        width: 80px !important;
+        height: 80px !important;
+        min-width: 80px !important;
+    }
+
+    .on-screen-garment-chooser .garment-items-container {
+        gap: 12px !important;
+    }
+}
+
+@media screen and (max-width: 320px) {
+    .garment-icon-btn {
+        width: 75px !important;
+        height: 75px !important;
+        min-width: 75px !important;
+        padding: 8px !important;
+    }
+
+    .on-screen-garment-chooser .garment-items-container {
+        gap: 10px !important;
+        padding: 10px !important;
+    }
+
+    .category-arrow-btn {
+        font-size: 1.8rem !important;
+        min-width: 40px !important;
+        min-height: 40px !important;
+    }
+
+    .category-name-display {
+        font-size: 0.9rem !important;
+    }
+}
+
+@media screen and (min-width: 415px) and (max-width: 768px) {
+    .garment-icon-btn {
+        width: 100px !important;
+        height: 100px !important;
+        min-width: 100px !important;
+        padding: 12px !important;
+    }
+
+    .on-screen-garment-chooser .garment-items-container {
+        gap: 20px !important;
+        padding: 18px !important;
+    }
+
+    .category-arrow-btn {
+        font-size: 2.4rem !important;
+        min-width: 55px !important;
+        min-height: 55px !important;
+        padding: 10px 18px !important;
+    }
+
+    .category-name-display {
+        font-size: 1.2rem !important;
+    }
+}
+
+@media screen and (orientation: landscape) and (max-height: 500px) {
+    .garment-icon-btn {
+        width: 70px !important;
+        height: 70px !important;
+        min-width: 70px !important;
+        padding: 6px !important;
+    }
+
+    .on-screen-garment-chooser .garment-items-container {
+        gap: 8px !important;
+        padding: 8px !important;
+    }
+
+    .garment-category-nav {
+        min-height: 50px !important;
+    }
+
+    .category-arrow-btn {
+        font-size: 1.6rem !important;
+        min-width: 35px !important;
+        min-height: 35px !important;
+    }
+
+    .category-name-display {
+        font-size: 0.85rem !important;
+    }
+}

@@ -1,0 +1,135 @@
+/* styles/itemPreview.css */
+.preview-section {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.section-title {
+    font-size: 0.9rem;
+    color: #bb86fc;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+}
+
+.item-preview-panel {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #000;
+    height: 225px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #00f0ff;
+    box-shadow:
+            0 0 5px #00f0ff,
+            0 0 10px #00f0ff,
+            0 0 15px #00f0ff;
+    animation: itemPreviewGlow 2s infinite alternate;
+}
+
+.no-selection {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+}
+
+.item-preview {
+    margin-bottom: 24px;
+}
+
+.no-item-selected {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 20px;
+    text-align: center;
+    background-color: rgba(30, 30, 30, 0.5);
+    border-radius: 8px;
+    letter-spacing: -0.01em;
+}
+
+.item-preview-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.item-preview-image {
+    position: relative;
+    height: 175px;
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #00f0ff;
+    box-shadow:
+            0 0 5px #00f0ff,
+            0 0 10px #00f0ff,
+            0 0 15px #00f0ff;
+    animation: itemPreviewGlow 2s infinite alternate;
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+.item-preview-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background-color: rgba(30, 30, 30, 0.7);
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.item-preview-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+}
+
+.item-preview-label {
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 500;
+}
+
+.item-preview-value {
+    font-weight: 590;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+}
+
+@keyframes itemPreviewGlow {
+    from {
+        box-shadow:
+                0 0 3px rgba(0, 240, 255, 0.4),
+                0 0 5px rgba(0, 240, 255, 0.3),
+                0 0 8px rgba(0, 240, 255, 0.2);
+    }
+    to {
+        box-shadow:
+                0 0 4px rgba(0, 240, 255, 0.5),
+                0 0 7px rgba(0, 240, 255, 0.4),
+                0 0 10px rgba(0, 240, 255, 0.3);
+    }
+}
+
+.item-preview-description {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.item-preview-description .item-preview-label {
+    display: block;
+    margin-bottom: 6px;
+}
+
+.item-preview-description p {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+    font-weight: 400;
+}

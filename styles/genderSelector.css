@@ -1,0 +1,486 @@
+/* styles/genderSelector.css */
+
+.build-info {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6);
+    pointer-events: none;
+    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.gender-selector {
+    max-width: 900px;
+    margin: 0 auto 32px;
+    padding: 20px;
+}
+
+.gender-selector-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.gender-selector-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.02em;
+}
+
+.gender-selector-subtitle {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+/* FORCE MOBILE LAYOUT - Single column by default */
+.gender-options {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+    margin-top: 24px !important;
+}
+
+.gender-option {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    border-radius: 16px;
+    overflow: hidden;
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.gender-option:hover {
+    transform: translateY(-8px);
+}
+
+.gender-card {
+    position: relative;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 24px;
+    height: 260px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    overflow: hidden;
+}
+
+.gender-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.gender-option:hover .gender-card::before {
+    opacity: 1;
+}
+
+.male-option:hover .gender-card {
+    background: linear-gradient(135deg, rgba(187, 134, 252, 0.15), rgba(187, 134, 252, 0.05));
+    border-color: rgba(187, 134, 252, 0.3);
+    box-shadow: 0 20px 60px rgba(187, 134, 252, 0.2);
+}
+
+.female-option:hover .gender-card {
+    background: linear-gradient(135deg, rgba(3, 218, 198, 0.15), rgba(3, 218, 198, 0.05));
+    border-color: rgba(3, 218, 198, 0.3);
+    box-shadow: 0 20px 60px rgba(3, 218, 198, 0.2);
+}
+
+.gender-icon-wrapper {
+    position: relative;
+    margin-bottom: 24px;
+}
+
+.gender-icon {
+    font-size: 3rem;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-weight: 300;
+    position: relative;
+    z-index: 2;
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.male-icon {
+    color: var(--primary);
+    background: linear-gradient(135deg, rgba(187, 134, 252, 0.2), rgba(187, 134, 252, 0.1));
+    border: 2px solid rgba(187, 134, 252, 0.3);
+}
+
+.female-icon {
+    color: var(--secondary);
+    background: linear-gradient(135deg, rgba(3, 218, 198, 0.2), rgba(3, 218, 198, 0.1));
+    border: 2px solid rgba(3, 218, 198, 0.3);
+}
+
+.icon-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 1;
+}
+
+.male-glow {
+    background: radial-gradient(circle, rgba(187, 134, 252, 0.4), transparent 70%);
+    box-shadow: 0 0 40px rgba(187, 134, 252, 0.6);
+}
+
+.female-glow {
+    background: radial-gradient(circle, rgba(3, 218, 198, 0.4), transparent 70%);
+    box-shadow: 0 0 40px rgba(3, 218, 198, 0.6);
+}
+
+.gender-option:hover .icon-glow {
+    opacity: 1;
+}
+
+.gender-option:hover .gender-icon {
+    transform: scale(1.1);
+}
+
+.gender-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.gender-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--on-surface);
+    letter-spacing: -0.01em;
+}
+
+.gender-description {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+    line-height: 1.4;
+    font-weight: 400;
+}
+
+.gender-features {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 8px;
+}
+
+.feature-tag {
+    font-size: 1rem;
+    padding: 4px 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.male-option:hover .feature-tag {
+    background: rgba(187, 134, 252, 0.2);
+    border-color: rgba(187, 134, 252, 0.3);
+    color: var(--primary);
+}
+
+.female-option:hover .feature-tag {
+    background: rgba(3, 218, 198, 0.2);
+    border-color: rgba(3, 218, 198, 0.3);
+    color: var(--secondary);
+}
+
+.selection-indicator {
+    margin-top: 16px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.selection-indicator span {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+    letter-spacing: 0.05em;
+}
+
+.gender-option:hover .selection-indicator {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.male-option:hover .selection-indicator span {
+    color: var(--primary);
+}
+
+.female-option:hover .selection-indicator span {
+    color: var(--secondary);
+}
+
+.gender-option:hover .male-glow {
+    animation: pulseGlow 2s ease-in-out infinite;
+}
+
+.gender-option:hover .female-glow {
+    animation: pulseGlow 2s ease-in-out infinite;
+}
+
+.gender-option:focus {
+    outline: none;
+    transform: translateY(-4px);
+}
+
+.gender-option:focus .gender-card {
+    box-shadow: 0 0 0 3px rgba(187, 134, 252, 0.5);
+}
+
+@keyframes pulseGlow {
+    0%, 100% {
+        opacity: 0.5;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+}
+
+/* Force mobile layout for devices under 1000px with EXTRA LARGE text and box-like cards */
+@media screen and (max-width: 999px) {
+    .gender-options {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 40px !important;
+    }
+
+    .gender-selector-title {
+        margin-top: 32px !important;
+        font-size: 6rem !important;
+        margin-bottom: 24px !important;
+    }
+
+    .gender-selector-subtitle {
+        font-size: 3.4rem !important;
+        line-height: 1.4 !important;
+        margin-bottom: 32px !important;
+        font-weight: 700 !important;
+    }
+
+    .gender-title {
+        font-size: 3rem !important;
+        margin-bottom: 16px !important;
+    }
+
+    .gender-description {
+        font-size: 2.6rem !important;
+        line-height: 1.6 !important;
+        margin-bottom: 16px !important;
+    }
+
+    .feature-tag {
+        font-size: 1.8rem !important;
+        padding: 16px 24px !important;
+        margin: 6px !important;
+    }
+
+    .selection-indicator span {
+        font-size: 1.4rem !important;
+    }
+
+    /* Box-like cards - more rectangular and spacious */
+    .gender-card {
+        height: 500px !important;
+        padding: 40px 32px !important;
+        border-radius: 24px !important;
+        border: 2px solid rgba(255, 255, 255, 0.2) !important;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .gender-icon {
+        font-size: 5.5rem !important;
+        width: 140px !important;
+        height: 140px !important;
+    }
+
+    .icon-glow {
+        width: 140px !important;
+        height: 140px !important;
+    }
+
+    .gender-content {
+        gap: 20px !important;
+    }
+
+    .gender-icon-wrapper {
+        margin-bottom: 24px !important;
+    }
+
+    .gender-features {
+        margin-top: 16px !important;
+        gap: 12px !important;
+    }
+
+    .selection-indicator {
+        margin-top: 24px !important;
+    }
+}
+
+/* Desktop: Two columns for screens 1000px and up */
+@media screen and (min-width: 1000px) {
+    .gender-selector {
+        padding: 40px 20px;
+    }
+
+    .gender-selector-header {
+        margin-bottom: 48px;
+    }
+
+    .gender-selector-title {
+        font-size: 2.5rem;
+    }
+
+    .gender-selector-subtitle {
+        font-size: 1.1rem;
+    }
+
+    .gender-options {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 32px !important;
+        margin-top: 48px !important;
+    }
+
+    .gender-card {
+        height: 280px;
+        padding: 32px 24px;
+    }
+
+    .gender-icon {
+        font-size: 4rem;
+        width: 100px;
+        height: 100px;
+    }
+
+    .icon-glow {
+        width: 100px;
+        height: 100px;
+    }
+
+    .gender-title {
+        font-size: 1.5rem;
+    }
+
+    .gender-description {
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .build-info {
+        top: 10px;
+        left: 10px;
+        font-size: 0.6rem;
+    }
+
+    .gender-selector {
+        padding: 32px 20px;
+    }
+
+    .gender-selector-title {
+        font-size: 3.5rem !important;
+    }
+
+    .gender-selector-subtitle {
+        font-size: 2.8rem !important;
+    }
+
+    .gender-card {
+        height: 480px !important;
+        padding: 36px 28px !important;
+    }
+
+    .gender-icon {
+        font-size: 5rem !important;
+        width: 130px !important;
+        height: 130px !important;
+    }
+
+    .icon-glow {
+        width: 130px !important;
+        height: 130px !important;
+    }
+
+    .gender-title {
+        font-size: 2.8rem !important;
+    }
+
+    .gender-description {
+        font-size: 2.2rem !important;
+    }
+
+    .feature-tag {
+        font-size: 1.6rem !important;
+        padding: 14px 20px !important;
+    }
+
+    .selection-indicator span {
+        font-size: 1.3rem !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .gender-option,
+    .gender-card,
+    .gender-icon,
+    .selection-indicator,
+    .icon-glow {
+        transition: none;
+    }
+
+    .gender-option:hover {
+        transform: none;
+    }
+
+    .male-glow,
+    .female-glow {
+        animation: none;
+    }
+}

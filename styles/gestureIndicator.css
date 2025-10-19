@@ -1,0 +1,156 @@
+/* styles/gestureIndicator.css */
+.gesture-indicator-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 15;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gesture-indicator {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    color: white;
+    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+    border: 2px solid;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    animation: gestureAppear 0.3s ease-out;
+    min-width: 200px;
+}
+
+.gesture-indicator.left {
+    border-color: #ff6b6b;
+    transform: translateX(-150px);
+}
+
+.gesture-indicator.right {
+    border-color: #4ecdc4;
+    transform: translateX(150px);
+}
+
+.gesture-icon {
+    font-size: 3rem;
+    margin-bottom: 8px;
+    animation: gestureFloat 2s ease-in-out infinite;
+}
+
+.gesture-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: white;
+}
+
+.gesture-progress-container {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.gesture-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #bb86fc, #03dac6);
+    border-radius: 3px;
+    transition: width 0.1s ease-out;
+    box-shadow: 0 0 10px rgba(187, 134, 252, 0.5);
+}
+
+.gesture-instruction {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+}
+
+@keyframes gestureAppear {
+    from {
+        opacity: 0;
+        transform: translateX(-150px) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-150px) scale(1);
+    }
+}
+
+.gesture-indicator.right {
+    animation: gestureAppearRight 0.3s ease-out;
+}
+
+@keyframes gestureAppearRight {
+    from {
+        opacity: 0;
+        transform: translateX(150px) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(150px) scale(1);
+    }
+}
+
+@keyframes gestureFloat {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+.gesture-prompt-arrows {
+    position: absolute;
+    top: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+    z-index: 15;
+}
+
+.gesture-arrow {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    margin: 0 20px;
+}
+
+.gesture-arrow:hover,
+.gesture-arrow.active {
+    background: rgba(3, 218, 198, 0.2);
+    border-color: rgba(3, 218, 198, 0.6);
+    color: rgba(3, 218, 198, 1);
+    transform: scale(1.1);
+}
+
+.gesture-arrow.triggered {
+    background: rgba(255, 107, 107, 0.3);
+    border-color: rgba(255, 107, 107, 0.8);
+    color: rgba(255, 107, 107, 1);
+    transform: scale(1.2);
+    animation: gestureTriggered 0.5s ease-out;
+}
+
+@keyframes gestureTriggered {
+    0% { transform: scale(1.2); }
+    50% { transform: scale(1.4); }
+    100% { transform: scale(1.2); }
+}

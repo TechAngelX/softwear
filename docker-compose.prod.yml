@@ -1,0 +1,44 @@
+services:
+  trka:
+    build: ./packages/trka
+    ports:
+      - "3001:80"
+    container_name: softwear-trka
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+  
+  trkb:
+    build: packages/main
+    ports:
+      - "3002:80"
+    container_name: softwear-trkb
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+  
+  # Info service that displays URLs after startup
+  info:
+    image: alpine:latest
+    container_name: softwear-info
+    depends_on:
+      - trka
+      - trkb
+    command: >
+      sh -c "
+      echo '';
+      echo 'SoftWear Virtual Try-On Platform';
+      echo '====================================';
+      echo 'Track A (SMPL Enhanced): http://localhost:3001';
+      echo 'Track B (Advanced Physics): http://localhost:3002';
+      echo '';
+      echo 'Track A: Production-ready SMPL implementation';
+      echo 'Track B: Experimental physics simulation';
+      echo '';
+      echo '====================================';
+      sleep 10
+      "

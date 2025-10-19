@@ -1,0 +1,19 @@
+/* styles/styles.css */
+@import './fonts.css';
+@import './base.css';
+@import './layout.css';
+@import './components.css';
+@import './genderSelector.css';
+@import './navigation.css';
+@import './privacy.css';
+@import './GarmentChooser.css';
+@import './ControlPanel.css';
+@import './itemPreview.css';
+@import './vtoViewPanel.css';
+@import './mobileView.css';
+@import './splashPage.css';
+@import './responsive.css'; /* Load responsive last */
+
+.status-warning {
+  color: #ff9800;
+}
