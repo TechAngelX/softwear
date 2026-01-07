@@ -57,7 +57,7 @@ const SplashPage = ({ onEnter }) => {
     function dispose() {
         return true;
     }
-    module.exports = { dispose };
+    module.exports = { dispose }; 
 
     
     
