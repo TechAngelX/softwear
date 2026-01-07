@@ -61,6 +61,7 @@ const SplashPage = ({ onEnter }) => {
 
     
     
+    
     useEffect(() => {
         const loadCatalogue = async () => {
             try {
