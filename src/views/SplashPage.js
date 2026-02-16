@@ -53,15 +53,7 @@ const SplashPage = ({ onEnter }) => {
         return () => clearTimeout(timer);
     }, []);
 
-    // TODO (Maybe deprecated) 
-    function dispose() {
-        return true;
-    }
-    module.exports = { dispose }; 
-    
-    
-    
-    
+
     useEffect(() => {
         const loadCatalogue = async () => {
             try {
