@@ -1,0 +1,20 @@
+{
+  "name": "softWEAR - Virtual Try-On",
+  "short_name": "softWEAR",
+  "description": "Real-time virtual try-on powered by AI. Try on clothes instantly using your camera.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0f0f0f",
+  "theme_color": "#0f0f0f",
+  "orientation": "portrait",
+  "categories": ["shopping", "fashion", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
