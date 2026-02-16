@@ -8,7 +8,7 @@
  */
 
 
-// TODO: test out the differenbt effects or remvoe...: 
+// TODO: Test out the different effects or remove if not needed
 // TRANSITION_EFFECTS.NONE - No effect 
 // TRANSITION_EFFECTS.FADE - Smooth fade in/out 
 // TRANSITION_EFFECTS.SCALE_POP - Bounce scale effect 

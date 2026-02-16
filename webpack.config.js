@@ -60,6 +60,9 @@ module.exports = (env, argv) => {
           { from: './public/images', to: 'images' },
           { from: './public/3dmodels', to: '3dmodels' },
           { from: './public/draco.worker.js', to: 'draco.worker.js' },
+          { from: './public/manifest.json', to: 'manifest.json' },
+          { from: './public/sw.js', to: 'sw.js' },
+          { from: './public/icons', to: 'icons' },
           { from: './src/tests/testSetup.js', to: 'testSetup.js' },
           {
             from: 'node_modules/three/examples/jsm/libs/draco',

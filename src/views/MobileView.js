@@ -115,14 +115,27 @@ const MobileView = React.forwardRef((props, ref) => {
             });
         };
 
+        // Track timeout ref for cleanup
+        let orientationTimeout = null;
+
+        const handleOrientationChange = () => {
+            // Clear any pending timeout
+            if (orientationTimeout) {
+                clearTimeout(orientationTimeout);
+            }
+            orientationTimeout = setTimeout(handleResize, 100);
+        };
+
         window.addEventListener('resize', handleResize);
-        window.addEventListener('orientationchange', () => {
-            setTimeout(handleResize, 100);
-        });
+        window.addEventListener('orientationchange', handleOrientationChange);
 
         return () => {
+            // Cleanup timeout
+            if (orientationTimeout) {
+                clearTimeout(orientationTimeout);
+            }
             window.removeEventListener('resize', handleResize);
-            window.removeEventListener('orientationchange', handleResize);
+            window.removeEventListener('orientationchange', handleOrientationChange);
         };
     }, [dispatch]);
 

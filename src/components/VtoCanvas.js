@@ -289,6 +289,13 @@ const VtoCanvas = forwardRef(({ onMeshInfoUpdate, isAccessoryCategory, garmentMo
                     if (!isCancelled) {
                         console.error('ERROR: Failed to load 3D model:', error);
                         console.error('Attempted path:', finalPath);
+
+                        // Cleanup DRACO loader on error
+                        if (dracoLoader) {
+                            dracoLoader.dispose();
+                            dracoLoader = null;
+                        }
+
                         if (onMeshInfoUpdate) {
                             onMeshInfoUpdate({ vertices: 0, fileSize: 0, error: 'Model load failed' });
                         }

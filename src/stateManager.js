@@ -32,7 +32,7 @@ export const initialState = {
         rightHandLandmarks: null,
         leftHandLandmarks: null,
         isControlPanelOpen: false,
-        gestureEnabled: false,
+        gestureEnabled: true,
         detectionPaused: false,
         showDebug: false,
         selfieCountdown: null,

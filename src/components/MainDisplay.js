@@ -257,7 +257,7 @@ const MainDisplay = ({ onGoHome }) => {
                 handleGarmentChangeByGesture('next');
                 break;
             case 'clap':
-                handleCategoryChangeByGesture();
+                handleCategoryChangeByGesture('next');
                 break;
             case 'peace_sign':
                 handleSelfieGesture();
@@ -282,17 +282,23 @@ const MainDisplay = ({ onGoHome }) => {
         }
         handleSelectGarment(flatGarmentList[nextIndex]);
     };
-    const handleCategoryChangeByGesture = () => {
+    const handleCategoryChangeByGesture = (direction = 'next') => {
         const totalCategories = getCurrentGarments().length;
         if (totalCategories === 0) return;
 
-        const nextCategoryIndex = (activeCategoryIndex + 1) % totalCategories;
+        let newCategoryIndex;
+        if (direction === 'next') {
+            newCategoryIndex = (activeCategoryIndex + 1) % totalCategories;
+        } else {
+            newCategoryIndex = (activeCategoryIndex - 1 + totalCategories) % totalCategories;
+        }
+
         audioManager.playSound('changeCategory');
-        dispatch({ type: ACTIONS.SET_VTO_STATE, payload: { activeCategoryIndex: nextCategoryIndex } });
-        setConfirmedCategoryIndex(nextCategoryIndex);
+        dispatch({ type: ACTIONS.SET_VTO_STATE, payload: { activeCategoryIndex: newCategoryIndex } });
+        setConfirmedCategoryIndex(newCategoryIndex);
         setTimeout(() => setConfirmedCategoryIndex(null), 800);
 
-        const newCategory = getCurrentGarments()[nextCategoryIndex];
+        const newCategory = getCurrentGarments()[newCategoryIndex];
         if (newCategory && newCategory.items.length > 0) {
             handleSelectGarment(newCategory.items[0].id);
         } else {

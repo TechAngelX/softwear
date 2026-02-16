@@ -93,19 +93,31 @@ class GestureDetector {
         const recentHandData = this.history.slice(-5);
         const handDistances = recentHandData.map(frame => {
             if (frame && frame.hands.left.valid && frame.hands.right.valid) {
-                return this.distance3D(frame.hands.left.wrist, frame.hands.right.wrist);
+                return {
+                    distance: this.distance3D(frame.hands.left.wrist, frame.hands.right.wrist),
+                    leftY: frame.hands.left.wrist.y,
+                    rightY: frame.hands.right.wrist.y
+                };
             }
-            return Infinity;
+            return null;
         });
 
-        this.clapState.distanceHistory = handDistances;
+        const validDistances = handDistances.filter(d => d !== null);
 
-        if (this.clapState.distanceHistory.length >= 3) {
-            const currentDist = this.clapState.distanceHistory[this.clapState.distanceHistory.length - 1];
-            const prevDist = this.clapState.distanceHistory[this.clapState.distanceHistory.length - 2];
-            const prevPrevDist = this.clapState.distanceHistory[this.clapState.distanceHistory.length - 3];
+        if (validDistances.length >= 3) {
+            const current = validDistances[validDistances.length - 1];
+            const prev = validDistances[validDistances.length - 2];
+            const prevPrev = validDistances[validDistances.length - 3];
 
-            const isClapMotion = (prevPrevDist > currentDist * 1.5) && (prevDist > currentDist * 1.5) && (currentDist < 0.15);
+            // Check hands were apart, then came together rapidly
+            const wasApart = prevPrev.distance > 0.2;
+            const cameTogetherRapidly = current.distance < prev.distance * 0.75;
+            const areClose = current.distance < 0.15;
+
+            // Check hands are at similar height (not too far apart vertically)
+            const handsAtSimilarHeight = Math.abs(current.leftY - current.rightY) < 0.2;
+
+            const isClapMotion = wasApart && cameTogetherRapidly && areClose && handsAtSimilarHeight;
 
             if (isClapMotion) {
                 this.clapState.hasTriggered = true;
@@ -269,28 +281,35 @@ class GestureDetector {
         const framesWithLeftHand = recentFrames.filter(f => f?.hands.left.valid);
         const framesWithRightHand = recentFrames.filter(f => f?.hands.right.valid);
 
+        // Require 3+ frames for detection
         if (framesWithLeftHand.length >= 3) {
             const avgDirection = framesWithLeftHand.reduce((sum, frame) => sum + frame.hands.left.direction.x, 0) / framesWithLeftHand.length;
-            const isHighUp = framesWithLeftHand.some(f => f.hands.left.wrist.y < 0.5);
 
-            if (isHighUp && avgDirection < -0.1) {
+            // Check hand is elevated (above waist level)
+            const isHighUp = framesWithLeftHand.some(f => f.hands.left.wrist.y < 0.6);
+
+            // Threshold of 0.15 for better detection
+            if (isHighUp && avgDirection < -0.15) {
                 return { type: 'pointing_right', confidence: 0.8, hand: 'left' };
             }
 
-            if (isHighUp && avgDirection > 0.1) {
+            if (isHighUp && avgDirection > 0.15) {
                 return { type: 'pointing_left', confidence: 0.8, hand: 'left' };
             }
         }
 
         if (framesWithRightHand.length >= 3) {
             const avgDirection = framesWithRightHand.reduce((sum, frame) => sum + frame.hands.right.direction.x, 0) / framesWithRightHand.length;
-            const isHighUp = framesWithRightHand.some(f => f.hands.right.wrist.y < 0.5);
 
-            if (isHighUp && avgDirection < -0.1) {
+            // Check hand is elevated (above waist level)
+            const isHighUp = framesWithRightHand.some(f => f.hands.right.wrist.y < 0.6);
+
+            // Threshold of 0.15 for better detection
+            if (isHighUp && avgDirection < -0.15) {
                 return { type: 'pointing_right', confidence: 0.8, hand: 'right' };
             }
 
-            if (isHighUp && avgDirection > 0.1) {
+            if (isHighUp && avgDirection > 0.15) {
                 return { type: 'pointing_left', confidence: 0.8, hand: 'right' };
             }
         }

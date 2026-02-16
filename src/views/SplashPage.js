@@ -49,7 +49,7 @@ const SplashPage = ({ onEnter }) => {
     useEffect(() => {
         const timer = setTimeout(() => {
             setIsIntroDone(true);
-        }, 4800);
+        }, 2500);
         return () => clearTimeout(timer);
     }, []);
 
@@ -65,6 +65,10 @@ const SplashPage = ({ onEnter }) => {
         };
         loadCatalogue();
     }, []);
+
+    useEffect(() => {
+        console.info(`softWEAR | Build: ${buildDate}`);
+    }, [buildDate]);
 
     const handleEnterExperience = () => {
         onEnter();
@@ -84,7 +88,7 @@ const SplashPage = ({ onEnter }) => {
         if (!mountRef.current || !catalogueData) return;
 
         let scene, camera, renderer;
-        let hologramGrid, starField, currentModel = null;
+        let hologramGrid, starField, starConnections, currentModel = null;
         let animFrameId;
         const clock = new THREE.Clock();
 
@@ -141,7 +145,7 @@ const SplashPage = ({ onEnter }) => {
                 key: 'leatherJacket',
                 gender: 'male',
                 color: new THREE.Color(0x003399),
-                scale: 1.5,
+                scale: 2.0,
                 speed: 0.5,
                 position: { x: 0, y: 0, z: 0 }
             },
@@ -157,7 +161,7 @@ const SplashPage = ({ onEnter }) => {
                 key: 'poloTee',
                 gender: 'male',
                 color: new THREE.Color(0xffffff),
-                scale: 2.5,
+                scale: 2.0,
                 speed: 1.6,
                 position: { x: -3, y: 0, z: -0.8 }
             },
@@ -173,7 +177,10 @@ const SplashPage = ({ onEnter }) => {
 
         const modelData = featuredItems.map(item => {
             const garment = catalogueData[item.gender]?.[item.key];
-            if (!garment) return null;
+            if (!garment) {
+                console.warn(`Featured item "${item.key}" not found in catalogue for ${item.gender}`);
+                return null;
+            }
             return {
                 catalogueKey: item.key,
                 gender: item.gender,
@@ -202,9 +209,9 @@ const SplashPage = ({ onEnter }) => {
             for (let i = 0; i < starCount; i++) {
                 const radius = 30 + Math.random() * 70;
                 const theta = Math.random() * Math.PI * 2;
-                const phi = Math.random() * Math.PI;
+                const phi = Math.random() * Math.PI * 0.5; // Upper hemisphere only
                 positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
-                positions[i * 3 + 1] = radius * Math.cos(phi);
+                positions[i * 3 + 1] = Math.abs(radius * Math.cos(phi)); // Always above origin
                 positions[i * 3 + 2] = radius * Math.sin(phi) * Math.sin(theta);
 
                 const color = new THREE.Color().setHSL(Math.random(), 0.7, 0.8);
@@ -227,23 +234,24 @@ const SplashPage = ({ onEnter }) => {
                     varying vec3 vColor;
                     varying float vSize;
                     uniform float time;
-                    
+
                     void main() {
                         vColor = color;
                         vSize = size;
-                        
+
                         vec3 pos = position;
-                        float twinkle = sin(time * 2.0 + length(pos) * 0.01);
-                        
+                        float phase = dot(pos, vec3(12.9898, 78.233, 45.164));
+                        float twinkle = sin(time * (1.0 + fract(phase) * 2.0) + phase) * 0.3 + 0.7;
+
                         vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-                        gl_PointSize = size * (300.0 / -mvPosition.z) * (0.5 + twinkle * 0.5);
+                        gl_PointSize = size * (300.0 / -mvPosition.z) * twinkle;
                         gl_Position = projectionMatrix * mvPosition;
                     }
                 `,
                 fragmentShader: `
                     varying vec3 vColor;
                     varying float vSize;
-                    
+
                     void main() {
                         vec2 coord = gl_PointCoord - vec2(0.5);
                         float dist = length(coord);
@@ -261,70 +269,176 @@ const SplashPage = ({ onEnter }) => {
         }
 
         function createHolographicGrid() {
-            const size = isMobile ? 20 : 40;
-            const divisions = isMobile ? 15 : 30;
-            const geometry = new THREE.PlaneGeometry(size, size, divisions, divisions);
-            const material = new THREE.ShaderMaterial({
-                uniforms: {
-                    time: { value: 0 },
-                    color: { value: new THREE.Color(0x03dac6) }
-                },
-                vertexShader: `
-                    uniform float time;
-                    void main() {
-                        vec3 pos = position;
-                        float dist = length(pos.xy);
-                        
-                        pos.z += sin(dist * 2.0 - time * 1.5) * 0.2;
-                        pos.z += cos(pos.x * 3.0 + time * 0.8) * 0.1;
-                        gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-                    }
-                `,
-                fragmentShader: `
-                    uniform float time;
-                    uniform vec3 color;
-                    void main() {
-                        float opacity = sin(time * 0.5) * 0.1 + 0.3;
-                        gl_FragColor = vec4(color, opacity);
-                    }
-                `,
-                transparent: true,
-                blending: THREE.AdditiveBlending,
-                wireframe: true
-            });
+            const gridGroup = new THREE.Group();
 
-            const grid = new THREE.Mesh(geometry, material);
-            grid.rotation.x = -Math.PI / 2;
-            grid.position.y = -2;
-            return grid;
+            const createGridPlane = (size, divisions, yPos, zOffset) => {
+                const geometry = new THREE.PlaneGeometry(size, size, divisions, divisions);
+                const material = new THREE.ShaderMaterial({
+                    uniforms: {
+                        time: { value: 0 }
+                    },
+                    vertexShader: `
+                        uniform float time;
+                        varying float vDist;
+                        varying float vWave;
+                        varying vec2 vUv;
+                        void main() {
+                            vUv = uv;
+                            vec3 pos = position;
+                            float dist = length(pos.xy);
+                            vDist = dist;
+
+                            float wave = sin(dist * 1.5 - time * 2.0) * 0.5;
+                            wave += cos(pos.x * 2.0 + time * 1.2) * 0.3;
+                            wave += sin(pos.y * 1.8 - time * 0.9) * 0.2;
+                            pos.z += wave;
+                            vWave = wave;
+                            gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+                        }
+                    `,
+                    fragmentShader: `
+                        uniform float time;
+                        varying float vDist;
+                        varying float vWave;
+                        varying vec2 vUv;
+                        void main() {
+                            float pulse = sin(time * 0.8) * 0.15 + 0.65;
+                            float fade = 1.0 - smoothstep(0.0, 30.0, vDist);
+                            float edgeFade = smoothstep(0.0, 0.15, vUv.x) * smoothstep(1.0, 0.85, vUv.x)
+                                           * smoothstep(0.0, 0.15, vUv.y) * smoothstep(1.0, 0.85, vUv.y);
+                            float glow = abs(vWave) * 1.5;
+                            vec3 neonCyan = vec3(0.0, 1.0, 0.95);
+                            vec3 neonPurple = vec3(0.73, 0.53, 0.99);
+                            vec3 color = mix(neonCyan, neonPurple, glow);
+                            gl_FragColor = vec4(color, pulse * fade * edgeFade * (0.5 + glow));
+                        }
+                    `,
+                    transparent: true,
+                    blending: THREE.AdditiveBlending,
+                    wireframe: true
+                });
+
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.rotation.x = -Math.PI / 2;
+                mesh.position.y = yPos;
+                mesh.position.z = zOffset;
+                return mesh;
+            };
+
+            const mainSize = isMobile ? 30 : 50;
+            const mainDiv = isMobile ? 20 : 35;
+
+            // Main floor grid
+            gridGroup.add(createGridPlane(mainSize, mainDiv, -3, 0));
+            // Extended far grid for depth
+            gridGroup.add(createGridPlane(mainSize, mainDiv, -3, -(mainSize * 0.85)));
+
+            gridGroup.userData.meshes = gridGroup.children;
+            return gridGroup;
         }
 
-        const loadModel = (modelInfo) => {
-            const garment = catalogueData[modelInfo.gender]?.[modelInfo.catalogueKey];
-            if (!garment) return;
+        function createStarConnections(starGeometry) {
+            const positions = starGeometry.getAttribute('position').array;
+            const starCount = positions.length / 3;
+            const maxConnections = isMobile ? 100 : 300;
+            const connectionDistance = 25;
 
+            const linePositions = [];
+            let connections = 0;
+
+            for (let i = 0; i < starCount && connections < maxConnections; i++) {
+                for (let j = i + 1; j < starCount && connections < maxConnections; j++) {
+                    const dx = positions[i * 3] - positions[j * 3];
+                    const dy = positions[i * 3 + 1] - positions[j * 3 + 1];
+                    const dz = positions[i * 3 + 2] - positions[j * 3 + 2];
+                    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+                    if (dist < connectionDistance) {
+                        linePositions.push(
+                            positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2],
+                            positions[j * 3], positions[j * 3 + 1], positions[j * 3 + 2]
+                        );
+                        connections++;
+                    }
+                }
+            }
+
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+
+            const material = new THREE.LineBasicMaterial({
+                color: 0x03dac6,
+                transparent: true,
+                opacity: 0.1,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+
+            return new THREE.LineSegments(geometry, material);
+        }
+
+        const preloadCache = new Map();
+        const preloadingKeys = new Set();
+
+        const preloadModel = (modelInfo) => {
+            const key = modelInfo.catalogueKey;
+            if (preloadCache.has(key) || preloadingKeys.has(key)) return;
+
+            const garment = catalogueData[modelInfo.gender]?.[key];
+            if (!garment) return;
             const path = resolveModelPath(garment, true);
             if (!path) return;
 
+            preloadingKeys.add(key);
             gltfLoader.load(path, (gltf) => {
-                if (currentModel) {
-                    fadeOutModel(currentModel, () => {
-                        scene.remove(currentModel);
-                        addNewModel(gltf, modelInfo);
-                        isTransitioning = false;
-                    });
-                } else {
-                    addNewModel(gltf, modelInfo);
-                    isTransitioning = false;
-                }
-            }, undefined, (error) => {
-                console.error('Error loading 3D model:', error);
-                isTransitioning = false;
+                preloadCache.set(key, gltf);
+                preloadingKeys.delete(key);
+            }, undefined, () => {
+                preloadingKeys.delete(key);
             });
         };
 
+        const showModel = (modelInfo) => {
+            const cached = preloadCache.get(modelInfo.catalogueKey);
+            if (cached) {
+                preloadCache.delete(modelInfo.catalogueKey);
+                swapModel(cached, modelInfo);
+            } else {
+                const garment = catalogueData[modelInfo.gender]?.[modelInfo.catalogueKey];
+                if (!garment) return;
+                const path = resolveModelPath(garment, true);
+                if (!path) return;
+
+                gltfLoader.load(path, (gltf) => {
+                    swapModel(gltf, modelInfo);
+                }, undefined, (error) => {
+                    console.error('Error loading 3D model:', error);
+                    isTransitioning = false;
+                    if (modelData.length > 1) {
+                        currentModelIndex = (currentModelIndex + 1) % modelData.length;
+                        lastChangeTimeRef.current = Date.now();
+                        showModel(modelData[currentModelIndex]);
+                    }
+                });
+            }
+        };
+
+        const swapModel = (gltf, modelInfo) => {
+            if (currentModel) {
+                const oldModel = currentModel;
+                fadeOutModel(oldModel, () => {
+                    scene.remove(oldModel);
+                });
+                addNewModel(gltf, modelInfo);
+                isTransitioning = false;
+            } else {
+                addNewModel(gltf, modelInfo);
+                isTransitioning = false;
+            }
+        };
+
         const fadeOutModel = (model, onComplete) => {
-            const duration = 800;
+            const duration = 400;
             const startTime = Date.now();
             const fadeAnimation = () => {
                 const elapsed = Date.now() - startTime;
@@ -364,7 +478,8 @@ const SplashPage = ({ onEnter }) => {
             currentModel.userData = {
                 rotationSpeed: modelInfo.rotationSpeed,
                 baseColor: modelInfo.color,
-                targetScale: modelInfo.scale * UNIVERSAL_SCALE
+                targetScale: modelInfo.scale * UNIVERSAL_SCALE,
+                baseY: finalY
             };
             currentModel.traverse((child) => {
                 if (child.isMesh && child.material) {
@@ -382,7 +497,7 @@ const SplashPage = ({ onEnter }) => {
         };
 
         const fadeInModel = (model) => {
-            const duration = 1200;
+            const duration = 600;
             const startTime = Date.now();
             const fadeAnimation = () => {
                 const elapsed = Date.now() - startTime;
@@ -462,15 +577,19 @@ const SplashPage = ({ onEnter }) => {
             );
             renderer = new THREE.WebGLRenderer({
                 antialias: !isMobile,
-                alpha: true,
+                alpha: false,
                 powerPreference: isMobile ? "low-power" : "high-performance"
             });
+            renderer.setClearColor(0x000000, 1);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
             renderer.setSize(window.innerWidth, window.innerHeight);
             container.appendChild(renderer.domElement);
 
             starField = createStarField();
             scene.add(starField);
+
+            starConnections = createStarConnections(starField.geometry);
+            scene.add(starConnections);
 
             hologramGrid = createHolographicGrid();
             scene.add(hologramGrid);
@@ -486,8 +605,11 @@ const SplashPage = ({ onEnter }) => {
             pointLight.position.set(0, 5, 0);
             scene.add(pointLight);
 
+            // Preload ALL models at startup for seamless transitions
+            modelData.forEach((info) => preloadModel(info));
+
             if (modelData.length > 0) {
-                loadModel(modelData[0]);
+                showModel(modelData[0]);
             }
             setIsLoaded(true);
         }
@@ -502,10 +624,15 @@ const SplashPage = ({ onEnter }) => {
             if (starField) {
                 starField.material.uniforms.time.value = elapsedTime;
                 starField.rotation.y += 0.0005;
+                if (starConnections) {
+                    starConnections.rotation.y = starField.rotation.y;
+                }
             }
 
-            if (hologramGrid) {
-                hologramGrid.material.uniforms.time.value = elapsedTime;
+            if (hologramGrid && hologramGrid.userData.meshes) {
+                hologramGrid.userData.meshes.forEach(mesh => {
+                    mesh.material.uniforms.time.value = elapsedTime;
+                });
             }
 
             if (currentModel) {
@@ -514,14 +641,14 @@ const SplashPage = ({ onEnter }) => {
                 currentModel.rotation.y += baseRotation + dynamicRotation;
 
                 const bob = Math.sin(elapsedTime * 2.0) * 0.1;
-                currentModel.position.y += bob * 0.1;
+                currentModel.position.y = currentModel.userData.baseY + bob;
             }
 
             if (!isTransitioning && now - lastChangeTimeRef.current > DISPLAY_TIME && modelData.length > 1) {
                 isTransitioning = true;
                 currentModelIndex = (currentModelIndex + 1) % modelData.length;
                 lastChangeTimeRef.current = now;
-                loadModel(modelData[currentModelIndex]);
+                showModel(modelData[currentModelIndex]);
             }
 
             renderer.render(scene, camera);
@@ -540,6 +667,43 @@ const SplashPage = ({ onEnter }) => {
         return () => {
             cancelAnimationFrame(animFrameId);
             window.removeEventListener('resize', onWindowResize);
+
+            const disposeMesh = (obj) => {
+                obj.traverse((child) => {
+                    if (child.isMesh) {
+                        child.geometry?.dispose();
+                        const mats = Array.isArray(child.material) ? child.material : [child.material];
+                        mats.forEach(mat => {
+                            if (mat) {
+                                mat.map?.dispose();
+                                mat.normalMap?.dispose();
+                                mat.roughnessMap?.dispose();
+                                mat.metalnessMap?.dispose();
+                                mat.emissiveMap?.dispose();
+                                mat.dispose();
+                            }
+                        });
+                    }
+                });
+            };
+
+            if (currentModel) disposeMesh(currentModel);
+            if (starField) {
+                starField.geometry?.dispose();
+                starField.material?.dispose();
+            }
+            if (starConnections) {
+                starConnections.geometry?.dispose();
+                starConnections.material?.dispose();
+            }
+            if (hologramGrid && hologramGrid.userData.meshes) {
+                hologramGrid.userData.meshes.forEach(mesh => {
+                    mesh.geometry?.dispose();
+                    mesh.material?.dispose();
+                });
+            }
+            dracoLoader.dispose();
+
             if (renderer && container.contains(renderer.domElement)) {
                 container.removeChild(renderer.domElement);
             }
@@ -549,10 +713,6 @@ const SplashPage = ({ onEnter }) => {
 
     return (
         <div className="splash-page-wrapper">
-            <div className="build-info">
-                <span>Build Date: {buildDate}</span>
-            </div>
-
             <div className={`initial-logo-container ${isIntroDone ? 'done' : ''}`}>
                 <h1 className="softwear-title-glass">softWEAR</h1>
             </div>
@@ -587,6 +747,20 @@ const SplashPage = ({ onEnter }) => {
                                         Experience virtual try-on like never before. Interactive, immersive,
                                         and intelligent fashion technology that transforms how you shop.
                                     </p>
+                                    <div className="feature-highlights">
+                                        <div className="feature">
+                                            <span className="feature-icon">&#9889;</span>
+                                            <span>Real-Time</span>
+                                        </div>
+                                        <div className="feature">
+                                            <span className="feature-icon">&#10024;</span>
+                                            <span>AI-Powered</span>
+                                        </div>
+                                        <div className="feature">
+                                            <span className="feature-icon">&#9757;</span>
+                                            <span>Interactive</span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className="cta-section">
                                     <button onClick={handleEnterExperience} className="primary-btn">

@@ -18,7 +18,7 @@ class CameraManager {
         if (this.globalHolistic) return this.globalHolistic;
         if (this.holisticPromise) return this.holisticPromise;
 
-        this.holisticPromise = new Promise(async (resolve, reject) => {
+        this.holisticPromise = (async () => {
             try {
                 const holistic = new Holistic({
                     locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`
@@ -43,14 +43,14 @@ class CameraManager {
                 await holistic.initialize();
 
                 this.globalHolistic = holistic;
-                resolve(holistic);
+                return holistic;
             } catch (error) {
                 console.error("Failed to create global holistic:", error);
                 this.globalHolistic = null;
                 this.holisticPromise = null;
-                reject(error);
+                throw error;
             }
-        });
+        })();
 
         return this.holisticPromise;
     }
@@ -97,6 +97,14 @@ class CameraManager {
             await this.cameraInstance.start();
         } catch (error) {
             console.error('Failed to start camera:', error);
+
+            // Cleanup first attempt
+            if (this.cameraInstance) {
+                this.cameraInstance.stop();
+                this.cameraInstance = null;
+            }
+
+            // Retry with lower resolution
             this.cameraInstance = new Camera(videoElement, {
                 onFrame: throttledCallback,
                 width: isMobile ? 480 : 1280,

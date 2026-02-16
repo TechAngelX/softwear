@@ -33,9 +33,11 @@ const GestureIndicator = ({ activeGesture, selectedGender }) => {
                 return '👈';
             case 'pointing_right':
                 return '👉';
-            case 'palm_hold':
-                return '🤚';
-            case 'wrist_cross':
+            case 'clap':
+                return '👏';
+            case 'peace_sign':
+                return '✌️';
+            case 'arms_crossed':
                 return selectedGender === 'male' ? '♀' : '♂';
             default:
                 return '🤚';
@@ -54,9 +56,10 @@ const GestureIndicator = ({ activeGesture, selectedGender }) => {
                 return 'gesture-indicator-left';
             case 'pointing_right':
                 return 'gesture-indicator-right';
-            case 'palm_hold':
+            case 'clap':
+            case 'peace_sign':
                 return 'gesture-indicator-center';
-            case 'wrist_cross':
+            case 'arms_crossed':
                 return 'gesture-indicator-center swap-gender';
             default:
                 return 'gesture-indicator-center';
@@ -74,9 +77,11 @@ const GestureIndicator = ({ activeGesture, selectedGender }) => {
             case 'pointing_left':
             case 'pointing_right':
                 return '#03dac6';
-            case 'palm_hold':
+            case 'clap':
                 return '#ff6b6b';
-            case 'wrist_cross':
+            case 'peace_sign':
+                return '#ffd700';
+            case 'arms_crossed':
                 return '#bb86fc';
             default:
                 return '#ffffff';
