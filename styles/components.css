@@ -1,14 +1,14 @@
 /* styles/components.css */
 
 .component-container {
-    margin-bottom: 24px;
+    margin-bottom: 16px;
 }
 
 .component-title {
     font-size: 0.8rem;
     font-weight: 600;
     margin-top: 0;
-    margin-bottom: 14px;
+    margin-bottom: 10px;
     color: var(--primary);
     border-bottom: var(--border-light);
     padding-bottom: 8px;
@@ -45,11 +45,11 @@
 }
 
 .status-success {
-    color: #4caf50;
+    color: var(--success);
 }
 
 .status-warning {
-    color: #ff9800;
+    color: var(--warning);
 }
 
 .status-error {
@@ -83,17 +83,17 @@
 }
 
 .gender-toggle-btn:hover {
-    background-color: rgba(187, 134, 252, 0.1);
+    background-color: rgba(14, 165, 233, 0.1);
     transform: translateY(-1px);
 }
 
 .gender-toggle-btn:focus {
     outline: none;
-    box-shadow: 0 0 0 2px rgba(187, 134, 252, 0.5);
+    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.5);
 }
 
 .gender-toggle-btn.active {
-    background-color: rgba(187, 134, 252, 0.15);
+    background-color: rgba(14, 165, 233, 0.15);
     color: var(--primary);
     border-color: var(--primary);
     box-shadow: var(--shadow-glow);
@@ -130,8 +130,8 @@
 }
 
 .home-bar-btn:hover {
-    background-color: rgba(3, 218, 198, 0.1);
-    box-shadow: 0 0 12px rgba(3, 218, 198, 0.25);
+    background-color: rgba(6, 182, 212, 0.1);
+    box-shadow: 0 0 12px rgba(6, 182, 212, 0.25);
     transform: translateY(-1px);
 }
 
@@ -168,108 +168,6 @@
 
 .countdown-text {
     font-size: 8rem;
-    font-weight: bold;
-    color: #fff;
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
-    animation: countdown-pulse 0.8s ease-in-out;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-@keyframes countdown-pulse {
-    0% {
-        transform: scale(0.5);
-        opacity: 0;
-    }
-    50% {
-        transform: scale(1.2);
-        opacity: 1;
-    }
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-
-/* Selfie button styles */
-.selfie-btn {
-    padding: 14px 20px;
-    border-radius: var(--border-radius);
-    font-size: 0.85rem;
-    font-weight: 590;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-    border: var(--border-light);
-    background: linear-gradient(135deg, #bb86fc 0%, #03dac6 100%);
-    color: #000;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.selfie-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(187, 134, 252, 0.4);
-}
-
-.selfie-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.selfie-btn.capturing {
-    background: linear-gradient(135deg, #03dac6 0%, #bb86fc 100%);
-}
-
-.selfie-btn.success {
-    background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
-}
-
-.selfie-btn-content {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-}
-
-.capture-spinner {
-    width: 16px;
-    height: 16px;
-    border: 2px solid transparent;
-    border-top-color: #000;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-}
-
-.success-icon {
-    font-size: 1.1em;
-    font-weight: bold;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Selfie countdown overlay */
-.countdown-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    pointer-events: none;
-}
-
-.countdown-text {
-    font-size: 8rem;
     font-family: 'SF Pro Display', system-ui, -apple-system, sans-serif;
     font-weight: 800;
     color: #fff;
@@ -278,8 +176,8 @@
             0 0 20px rgba(255, 255, 255, 0.8),
             0 0 40px rgba(255, 255, 255, 0.6),
             0 0 60px rgba(255, 255, 255, 0.4);
-    -webkit-text-stroke: 3px #ff0000;
-    text-stroke: 3px #ff0000;
+    -webkit-text-stroke: 3px var(--error);
+    text-stroke: 3px var(--error);
     animation: countdown-pulse-racing 0.8s ease-in-out;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -317,7 +215,7 @@
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
     border: var(--border-light);
-    background: linear-gradient(135deg, #bb86fc 0%, #03dac6 100%);
+    background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
     color: #000;
     position: relative;
     overflow: hidden;
@@ -328,7 +226,7 @@
 
 .selfie-btn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(187, 134, 252, 0.4);
+    box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
 }
 
 .selfie-btn:disabled {
@@ -338,11 +236,11 @@
 }
 
 .selfie-btn.capturing {
-    background: linear-gradient(135deg, #03dac6 0%, #bb86fc 100%);
+    background: linear-gradient(135deg, #06b6d4 0%, #0ea5e9 100%);
 }
 
 .selfie-btn.success {
-    background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+    background: linear-gradient(135deg, var(--success) 0%, #66bb6a 100%);
 }
 
 .selfie-btn-content {
@@ -375,7 +273,7 @@
 @media (max-width: 767px) {
     .countdown-text {
         font-size: 6rem;
-        -webkit-text-stroke: 2px #ff0000;
-        text-stroke: 2px #ff0000;
+        -webkit-text-stroke: 2px var(--error);
+        text-stroke: 2px var(--error);
     }
 }

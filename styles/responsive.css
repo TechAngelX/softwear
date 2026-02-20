@@ -142,3 +142,13 @@
         animation: none;
     }
 }
+
+@media (prefers-contrast: more) {
+    :root {
+        --border-light: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    html.light-mode {
+        --border-light: 1px solid rgba(0, 0, 0, 0.3);
+    }
+}

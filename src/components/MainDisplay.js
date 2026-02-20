@@ -185,13 +185,13 @@ const MainDisplay = ({ onGoHome }) => {
             console.log('Holistic instance created, setting options...');
             holistic.setOptions({
                 selfieMode: false,
-                modelComplexity: 1,
-                smoothLandmarks: true,
+                modelComplexity: isMobileLayout ? 0 : 1,
+                smoothLandmarks: false,
                 enableSegmentation: true,
                 smoothSegmentation: true,
                 refineFaceLandmarks: false,
-                minDetectionConfidence: 0.5,
-                minTrackingConfidence: 0.5
+                minDetectionConfidence: isMobileLayout ? 0.4 : 0.5,
+                minTrackingConfidence: isMobileLayout ? 0.3 : 0.5
             });
             console.log('Initializing holistic...');
             await holistic.initialize();
@@ -365,7 +365,7 @@ const MainDisplay = ({ onGoHome }) => {
                             x: getOrCreateFilter(`landmark_${index}_x`).filter(landmark.x, now),
                             y: getOrCreateFilter(`landmark_${index}_y`).filter(landmark.y, now),
                             z: getOrCreateFilter(`landmark_${index}_z`).filter(landmark.z, now),
-                            visibility: landmark.visibility
+                            visibility: getOrCreateFilter(`landmark_${index}_vis`, 30, 1.5, 0.0, 1.0).filter(landmark.visibility, now)
                         }));
                         dispatch({ type: ACTIONS.SET_VIEW_STATE, payload: { poseLandmarks: smoothedLandmarks } });
                     } else {

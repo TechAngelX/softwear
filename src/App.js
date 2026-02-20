@@ -13,9 +13,23 @@ import GenderSelector from './views/GenderSelector';
 function AppContent() {
     const { state, dispatch, handlePrivacyAccept, handlePrivacyDecline } = useStateManager();
     const [showSplash, setShowSplash] = useState(true);
-    const { showPrivacyModal, showPrivacyPage, privacyAccepted, privacyConsentChecked } = state.appState;
+    const { showPrivacyModal, showPrivacyPage, privacyAccepted, privacyConsentChecked, theme } = state.appState;
     const { selectedGender } = state.vtoState;
     const { isMobileLayout, deviceInfo } = useDeviceDetection();
+
+    // Apply theme class to document root and persist to localStorage
+    useEffect(() => {
+        if (theme === 'light') {
+            document.documentElement.classList.add('light-mode');
+        } else {
+            document.documentElement.classList.remove('light-mode');
+        }
+        try {
+            localStorage.setItem('softwear_theme', theme);
+        } catch {
+            // localStorage unavailable
+        }
+    }, [theme]);
 
     useEffect(() => {
         const splashShown = sessionStorage.getItem('softWearSplashShown');

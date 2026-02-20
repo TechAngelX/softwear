@@ -1,58 +1,14 @@
 // src/utils/CameraManager.js
 
 import { Camera } from '@mediapipe/camera_utils';
-import { Holistic } from '@mediapipe/holistic';
 
 class CameraManager {
     constructor() {
         this.cameraInstance = null;
         this.onFrameCallback = null;
         this.isDetecting = true;
-        this.globalHolistic = null;
-        this.holisticPromise = null;
         this.lastProcessTime = 0;
         this.processingThrottle = 16;
-    }
-
-    async initialiseGlobalHolistic() {
-        if (this.globalHolistic) return this.globalHolistic;
-        if (this.holisticPromise) return this.holisticPromise;
-
-        this.holisticPromise = (async () => {
-            try {
-                const holistic = new Holistic({
-                    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`
-                });
-                if (!holistic) {
-                    throw new Error('Failed to create Holistic instance');
-                }
-
-                const isMobile = window.innerWidth <= 768;
-
-                holistic.setOptions({
-                    selfieMode: false,
-                    modelComplexity: isMobile ? 1 : 1,
-                    smoothLandmarks: false,
-                    enableSegmentation: true,
-                    smoothSegmentation: false,
-                    refineFaceLandmarks: false,
-                    minDetectionConfidence: isMobile ? 0.5 : 0.5,
-                    minTrackingConfidence: isMobile ? 0.5 : 0.5
-                });
-
-                await holistic.initialize();
-
-                this.globalHolistic = holistic;
-                return holistic;
-            } catch (error) {
-                console.error("Failed to create global holistic:", error);
-                this.globalHolistic = null;
-                this.holisticPromise = null;
-                throw error;
-            }
-        })();
-
-        return this.holisticPromise;
     }
 
     async startCamera(videoElement, onFrameCallback) {

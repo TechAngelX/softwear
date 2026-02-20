@@ -100,11 +100,11 @@
 }
 
 .gender-btn-mobile.active {
-    background: linear-gradient(135deg, #bb86fc, #03dac6);
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
     color: #000;
     border-color: rgba(255, 255, 255, 0.5);
     transform: scale(1.1);
-    box-shadow: 0 0 20px rgba(187, 134, 252, 0.6);
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.6);
 }
 
 .gender-btn-mobile:disabled {

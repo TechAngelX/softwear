@@ -14,7 +14,7 @@ const MEDIAPIPE_LANDMARKS = {
 };
 
 export class SMPLXPoseMapper {
-    constructor(boneData = {}) {
+    constructor(boneData = {}, isMobile = false) {
         this.initialized = false;
         this.boneMap = {};
         this.skeleton = null;
@@ -22,6 +22,7 @@ export class SMPLXPoseMapper {
         this.lastMorphInfluence = 0.0;
         this.lastBoneQuaternions = {};
         this.lastUpdateTime = 0;
+        this.visibilityThreshold = isMobile ? 0.1 : 0.5;
 
         this.bindVectors = this.calculateBindVectors(boneData);
 
@@ -112,7 +113,7 @@ export class SMPLXPoseMapper {
             if (!landmarkCache[index]) {
                 const { x, y, z } = landmarks[index];
 
-                if (landmarks[index].visibility < 0.5) {
+                if (landmarks[index].visibility < this.visibilityThreshold) {
                     landmarkCache[index] = new THREE.Vector3(0, 0, 0);
                     return landmarkCache[index];
                 }

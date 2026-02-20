@@ -3,6 +3,15 @@
 import React, { createContext, useReducer, useContext, useEffect } from 'react';
 
 const PRIVACY_CONSENT_KEY = 'softwear_privacy_consent';
+const THEME_KEY = 'softwear_theme';
+
+const getInitialTheme = () => {
+    try {
+        return localStorage.getItem(THEME_KEY) || 'dark';
+    } catch {
+        return 'dark';
+    }
+};
 
 export const initialState = {
     appState: {
@@ -10,7 +19,8 @@ export const initialState = {
         showPrivacyModal: false,
         showPrivacyPage: false,
         privacyAccepted: false,
-        privacyConsentChecked: false, 
+        privacyConsentChecked: false,
+        theme: getInitialTheme(),
     },
     vtoState: {
         selectedGender: null,
@@ -51,6 +61,7 @@ export const ACTIONS = {
     LOAD_DATA: 'LOAD_DATA',
     CHECK_PRIVACY_CONSENT: 'CHECK_PRIVACY_CONSENT',
     ACCEPT_PRIVACY: 'ACCEPT_PRIVACY',
+    SET_THEME: 'SET_THEME',
 };
 
 const appReducer = (state, action) => {
@@ -93,6 +104,14 @@ const appReducer = (state, action) => {
                     ...state.appState,
                     privacyAccepted: true,
                     showPrivacyModal: false
+                }
+            };
+        case ACTIONS.SET_THEME:
+            return {
+                ...state,
+                appState: {
+                    ...state.appState,
+                    theme: action.payload
                 }
             };
         default:

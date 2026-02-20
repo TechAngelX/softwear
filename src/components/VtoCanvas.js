@@ -146,7 +146,7 @@ const VtoCanvas = forwardRef(({ onMeshInfoUpdate, isAccessoryCategory, garmentMo
 
         stateRef.poseEngine = new VtoPoseEngine();
         stateRef.headPoseMapper = new HeadPoseMapper(smplxBoneData);
-        stateRef.poseMapper = new SMPLXPoseMapper();
+        stateRef.poseMapper = new SMPLXPoseMapper({}, window.innerWidth <= 768);
         stateRef.physics = new GarmentPhysics();
 
         let lastTime = performance.now();

@@ -67,7 +67,7 @@ const MobileView = React.forwardRef((props, ref) => {
 
     const poseEngineRef = useRef(null);
     const headPoseMapperRef = useRef(new HeadPoseMapper(boneData));
-    const poseMapperRef = useRef(new SMPLXPoseMapper(boneData));
+    const poseMapperRef = useRef(new SMPLXPoseMapper(boneData, true));
     const physicsEngineRef = useRef(new GarmentPhysics());
 
     useEffect(() => {

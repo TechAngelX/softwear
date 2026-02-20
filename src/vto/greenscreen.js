@@ -1,7 +1,21 @@
 // src/vto/greenscreen.js
 
+// Module-level cached temp canvas to avoid creating a new one every frame
+let tempCanvas = null;
+let tempCtx = null;
+
+const getTempCanvas = (width, height) => {
+    if (!tempCanvas || tempCanvas.width !== width || tempCanvas.height !== height) {
+        tempCanvas = document.createElement('canvas');
+        tempCanvas.width = width;
+        tempCanvas.height = height;
+        tempCtx = tempCanvas.getContext('2d');
+    }
+    return { canvas: tempCanvas, ctx: tempCtx };
+};
+
 /**
- * Digital greenscreen utility for the 'virtual wardrobe'. Applies a segmentation mask to a canvas context to 
+ * Digital greenscreen utility for the 'virtual wardrobe'. Applies a segmentation mask to a canvas context to
  * create a virtual background effect. This function effectively "cuts out" the person from the camera
  * feed, allowing a CSS background on the parent element to show through.
  *
@@ -20,17 +34,16 @@ export const applySegmentation = (ctx, results) => {
 
     ctx.globalCompositeOperation = 'source-over';
 
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = canvas.width;
-    tempCanvas.height = canvas.height;
-    const tempCtx = tempCanvas.getContext('2d');
+    const temp = getTempCanvas(canvas.width, canvas.height);
+    temp.ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    tempCtx.drawImage(segmentationMask, 0, 0, canvas.width, canvas.height);
+    temp.ctx.globalCompositeOperation = 'source-over';
+    temp.ctx.drawImage(segmentationMask, 0, 0, canvas.width, canvas.height);
 
-    tempCtx.globalCompositeOperation = 'source-in';
-    tempCtx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    temp.ctx.globalCompositeOperation = 'source-in';
+    temp.ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
-    ctx.drawImage(tempCanvas, 0, 0);
+    ctx.drawImage(temp.canvas, 0, 0);
 
     ctx.restore();
 };
@@ -54,17 +67,16 @@ export const applySegmentationWithBackground = (ctx, results, backgroundImage = 
         ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
     }
 
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = canvas.width;
-    tempCanvas.height = canvas.height;
-    const tempCtx = tempCanvas.getContext('2d');
+    const temp = getTempCanvas(canvas.width, canvas.height);
+    temp.ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    tempCtx.drawImage(segmentationMask, 0, 0, canvas.width, canvas.height);
+    temp.ctx.globalCompositeOperation = 'source-over';
+    temp.ctx.drawImage(segmentationMask, 0, 0, canvas.width, canvas.height);
 
-    tempCtx.globalCompositeOperation = 'source-in';
-    tempCtx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    temp.ctx.globalCompositeOperation = 'source-in';
+    temp.ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
-    ctx.drawImage(tempCanvas, 0, 0);
+    ctx.drawImage(temp.canvas, 0, 0);
 
     ctx.restore();
 };

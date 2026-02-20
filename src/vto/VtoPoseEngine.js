@@ -24,6 +24,9 @@ export class VtoPoseEngine {
         this.currentLandmarks = null;
         this.updateCount = 0;
 
+        // Grace period: ~0.5s at 30fps before hiding garment
+        this.lostFrameThreshold = 15;
+
         console.log('VtoPoseEngine: Initialized for mobile:', this.isMobile);
 
         const filterConfig = {
@@ -86,11 +89,57 @@ export class VtoPoseEngine {
         }
 
         const visibilityThreshold = this.isMobile ? 0.1 : 0.5;
-        const hasGoodLandmarks = [leftShoulder, rightShoulder, leftHip, rightHip].every(lm => lm && lm.visibility > visibilityThreshold);
 
-        if (!hasGoodLandmarks) {
+        // Check which landmarks are visible
+        const shouldersVisible = leftShoulder && rightShoulder &&
+            leftShoulder.visibility > visibilityThreshold &&
+            rightShoulder.visibility > visibilityThreshold;
+        const hipsVisible = leftHip && rightHip &&
+            leftHip.visibility > visibilityThreshold &&
+            rightHip.visibility > visibilityThreshold;
+
+        // Determine effective landmarks (with partial estimation)
+        let effectiveLeftHip = leftHip;
+        let effectiveRightHip = rightHip;
+        let hasUsableLandmarks = shouldersVisible && hipsVisible;
+
+        // Partial landmark fallback: estimate hips from shoulder width when hips aren't visible
+        if (shouldersVisible && !hipsVisible) {
+            const shoulderWidth = Math.abs(leftShoulder.x - rightShoulder.x);
+            const estimatedTorsoHeight = shoulderWidth * 1.3;
+            const shoulderMidZ = (leftShoulder.z + rightShoulder.z) / 2;
+
+            effectiveLeftHip = {
+                x: leftShoulder.x,
+                y: leftShoulder.y + estimatedTorsoHeight,
+                z: shoulderMidZ,
+                visibility: 0.3
+            };
+            effectiveRightHip = {
+                x: rightShoulder.x,
+                y: rightShoulder.y + estimatedTorsoHeight,
+                z: shoulderMidZ,
+                visibility: 0.3
+            };
+            hasUsableLandmarks = true;
+
+            if (this.updateCount % 30 === 0) {
+                console.log('VtoPoseEngine: Using estimated hip positions from shoulder width');
+            }
+        }
+
+        if (!hasUsableLandmarks) {
             this.lostFrameCount++;
-            if (this.lostFrameCount > 5) {
+
+            // During grace period, hold garment at last valid position (freeze in place)
+            if (this.lostFrameCount <= this.lostFrameThreshold && this.lastValidLandmarks) {
+                // Keep garment visible but frozen at last known position
+                garmentModel.visible = true;
+                return;
+            }
+
+            // After grace period, hide garment
+            if (this.lostFrameCount > this.lostFrameThreshold) {
                 garmentModel.visible = false;
                 this.trackingLost = true;
                 if (this.updateCount % 30 === 0) {
@@ -103,13 +152,13 @@ export class VtoPoseEngine {
         this.lostFrameCount = 0;
         this.trackingLost = false;
         garmentModel.visible = true;
-        this.lastValidLandmarks = { leftShoulder, rightShoulder, leftHip, rightHip };
+        this.lastValidLandmarks = { leftShoulder, rightShoulder, leftHip: effectiveLeftHip, rightHip: effectiveRightHip };
 
         const timestamp = Date.now();
 
         const shoulderMidpointX = (leftShoulder.x + rightShoulder.x) / 2;
         const shoulderMidpointY = (leftShoulder.y + rightShoulder.y) / 2;
-        const hipMidpointY = (leftHip.y + rightHip.y) / 1.8;
+        const hipMidpointY = (effectiveLeftHip.y + effectiveRightHip.y) / 1.8;
         const torsoCenterY = (shoulderMidpointY + hipMidpointY) / 2 - 0.05;
         const zOffset = (leftShoulder.z + rightShoulder.z) / 2;
 
@@ -120,7 +169,7 @@ export class VtoPoseEngine {
         this._projectToWorld(this.targetPosition, camera);
 
         this.shoulderMidpoint.set(shoulderMidpointX, shoulderMidpointY, (leftShoulder.z + rightShoulder.z) / 2);
-        this.hipMidpoint.set((leftHip.x + rightHip.x) / 2, hipMidpointY, (leftHip.z + rightHip.z) / 2);
+        this.hipMidpoint.set((effectiveLeftHip.x + effectiveRightHip.x) / 2, hipMidpointY, (effectiveLeftHip.z + effectiveRightHip.z) / 2);
         const torsoHeight = this.shoulderMidpoint.distanceTo(this.hipMidpoint);
 
         const GARMENT_TORSO_HEIGHT_RATIO = this.isMobile ? 1.8 : 2.7;

@@ -1,24 +1,87 @@
 /* /styles/base.css */
 
 :root {
-    --primary: #bb86fc;
-    --primary-dark: #3700b3;
-    --secondary: #03dac6;
-    --background: #0f0f0f;
-    --surface: #1a1a1a;
-    --surface-light: #252525;
-    --error: #cf6679;
+    /* Primary palette - Sky Blue (enterprise) */
+    --primary-50: #f0f9ff;
+    --primary-100: #e0f2fe;
+    --primary-200: #bae6fd;
+    --primary-300: #7dd3fc;
+    --primary-400: #38bdf8;
+    --primary-500: #0ea5e9;
+    --primary-600: #0284c7;
+    --primary-700: #0369a1;
+    --primary-800: #075985;
+    --primary-900: #0c4a6e;
+
+    /* Neutral palette - Slate */
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-800: #1e293b;
+    --gray-900: #0f172a;
+
+    /* Semantic colors */
+    --primary: #0ea5e9;
+    --primary-dark: #0369a1;
+    --secondary: #06b6d4;
+    --error: #ef4444;
+    --success: #22c55e;
+    --warning: #f59e0b;
     --on-primary: #ffffff;
     --on-secondary: #000000;
-    --on-background: #ffffff;
-    --on-surface: #e1e1e1;
-    --on-error: #000000;
+    --on-error: #ffffff;
+
+    /* Dark mode (default) */
+    --background: #0b1120;
+    --surface: #1e293b;
+    --surface-light: #334155;
+    --on-background: #f1f5f9;
+    --on-surface: #e2e8f0;
+
+    /* Borders, shadows, glass */
     --border-radius: 6px;
-    --shadow-1: 0 2px 8px rgba(0,0,0,0.6);
-    --shadow-2: 0 4px 16px rgba(0,0,0,0.7);
-    --shadow-glow: 0 0 12px rgba(187, 134, 252, 0.25);
+    --border-light: 1px solid rgba(255,255,255,0.08);
+    --shadow-1: 0 2px 8px rgba(0,0,0,0.4);
+    --shadow-2: 0 4px 16px rgba(0,0,0,0.5);
+    --shadow-glow: 0 0 12px rgba(14, 165, 233, 0.25);
+    --glass-bg: rgba(15, 23, 42, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.08);
     --transition: all 0.2s ease;
-    --border-light: 1px solid rgba(255,255,255,0.12);
+
+    color-scheme: dark;
+}
+
+/* Light mode override */
+html.light-mode {
+    --background: #ffffff;
+    --surface: #f1f5f9;
+    --surface-light: #e2e8f0;
+    --on-background: #0f172a;
+    --on-surface: #334155;
+    --border-light: 1px solid rgba(0,0,0,0.1);
+    --shadow-1: 0 2px 8px rgba(0,0,0,0.08);
+    --shadow-2: 0 4px 16px rgba(0,0,0,0.12);
+    --shadow-glow: 0 0 12px rgba(14, 165, 233, 0.15);
+    --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-border: rgba(0, 0, 0, 0.08);
+
+    color-scheme: light;
+}
+
+/* Accessibility: focus-visible */
+:focus-visible {
+    outline: 2px solid var(--primary-500);
+    outline-offset: 2px;
+}
+
+::selection {
+    background: var(--primary-200);
+    color: var(--primary-900);
 }
 
 body {
@@ -32,7 +95,14 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-image:
-            linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+            linear-gradient(rgba(14, 165, 233, 0.015) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(14, 165, 233, 0.015) 1px, transparent 1px);
+    background-size: 24px 24px;
+}
+
+html.light-mode body {
+    background-image:
+            linear-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
     background-size: 24px 24px;
 }

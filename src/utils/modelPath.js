@@ -29,8 +29,12 @@ export const resolveModelPath = (garment, forceMobile = false) => {
     const shouldUseMobile = forceMobile || (typeof window !== 'undefined' && window.innerWidth <= 768);
 
     if (shouldUseMobile) {
-        const mobilePath = garment.modelPath.replace('.glb', '_mob.glb');
-        return mobilePath;
+        // Prefer explicit modelPathMobile from catalogue when available
+        if (garment.modelPathMobile) {
+            return garment.modelPathMobile;
+        }
+        // Fallback to convention-based _mob.glb replacement
+        return garment.modelPath.replace('.glb', '_mob.glb');
     }
 
     return garment.modelPath;

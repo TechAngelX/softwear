@@ -15,5 +15,5 @@
 @import './responsive.css'; /* Load responsive last */
 
 .status-warning {
-  color: #ff9800;
+  color: var(--warning);
 }

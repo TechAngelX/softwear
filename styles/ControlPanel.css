@@ -29,25 +29,25 @@
 }
 
 .btn-success {
-    background-color: #4caf50;
+    background-color: var(--success);
     color: white;
-    border: 1px solid #43a047;
+    border: 1px solid var(--success);
     font-weight: 600;
 }
 
 .btn-success:hover {
-    background-color: #43a047;
+    background-color: var(--success);
 }
 
 .btn-danger {
-    background-color: #f44336;
+    background-color: var(--error);
     color: white;
-    border: 1px solid #e53935;
+    border: 1px solid var(--error);
     font-weight: 600;
 }
 
 .btn-danger:hover {
-    background-color: #e53935;
+    background-color: var(--error);
 }
 
 .btn-outline {
@@ -57,11 +57,11 @@
 }
 
 .btn-outline:hover {
-    background-color: rgba(187, 134, 252, 0.1);
+    background-color: rgba(14, 165, 233, 0.1);
 }
 
 .btn-outline-active {
-    background-color: rgba(187, 134, 252, 0.15);
+    background-color: rgba(14, 165, 233, 0.15);
     border-color: var(--primary);
     color: var(--primary);
     font-weight: 600;

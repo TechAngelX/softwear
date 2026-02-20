@@ -9,6 +9,7 @@ const ControlPanel = ({ vtoCanvasRef, onBackgroundChange }) => {
     const { showLandmarks, showGarment, selectedBackground, bodyModelMode, physicsEnabled } = state.vtoState;
     const { selectedGarment, selectedGender } = state.vtoState;
     const { garmentData } = state.data;
+    const { theme } = state.appState;
     const currentGarment = garmentData?.[selectedGender]?.[selectedGarment];
 
     const handleToggleGarment = () => {
@@ -19,17 +20,8 @@ const ControlPanel = ({ vtoCanvasRef, onBackgroundChange }) => {
         dispatch({ type: ACTIONS.SET_VTO_STATE, payload: { showLandmarks: !showLandmarks } });
     };
 
-    const handleToggleBodyModel = () => {
-        dispatch({
-            type: ACTIONS.SET_VTO_STATE,
-            payload: {
-                bodyModelMode: bodyModelMode === 'off' ? 'smpl' : bodyModelMode === 'smpl' ? 'smplx' : 'off'
-            }
-        });
-    };
-
-    const handleTogglePhysics = () => {
-        dispatch({ type: ACTIONS.SET_VTO_STATE, payload: { physicsEnabled: !physicsEnabled } });
+    const handleToggleTheme = () => {
+        dispatch({ type: ACTIONS.SET_THEME, payload: theme === 'dark' ? 'light' : 'dark' });
     };
 
     return (
@@ -68,6 +60,13 @@ const ControlPanel = ({ vtoCanvasRef, onBackgroundChange }) => {
                     className={`btn-control ${showLandmarks ? 'active' : ''}`}
                 >
                     {showLandmarks ? 'Hide Landmarks [L]' : 'Show Landmarks [L]'}
+                </button>
+                <button
+                    onClick={handleToggleTheme}
+                    className="btn-control"
+                    aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                >
+                    {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
                 </button>
             </div>
         </div>

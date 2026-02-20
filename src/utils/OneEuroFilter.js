@@ -51,9 +51,9 @@ export class OneEuroFilter {
         const timeDiff = timestamp - this.lasttime;
         this.lasttime = timestamp;
 
-        // Use original frequency if timestamp is invalid
+        // Use original frequency if timestamp is invalid, clamp to prevent spikes
         if (timeDiff > 0) {
-            this.freq = 1000 / timeDiff;
+            this.freq = Math.max(10, Math.min(120, 1000 / timeDiff));
         }
 
         const dvalue = this.x.y === null ? 0.0 : (value - this.x.y) * this.freq;
