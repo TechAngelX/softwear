@@ -4,71 +4,8 @@ import { VtoPoseEngine } from '../../vto/VtoPoseEngine';
 import { HeadPoseMapper } from '../../vto/HeadPoseMapper';
 import * as THREE from 'three';
 
-// Mock THREE.js with all required methods
-jest.mock('three', () => {
-    const mockVector3 = function(x = 0, y = 0, z = 0) {
-        this.x = x; this.y = y; this.z = z;
-        this.set = jest.fn(function(x, y, z) { this.x = x; this.y = y; this.z = z; return this; });
-        this.copy = jest.fn(function(v) { this.x = v.x; this.y = v.y; this.z = v.z; return this; });
-        this.lerp = jest.fn(function(target, alpha) {
-            this.x += (target.x - this.x) * alpha;
-            this.y += (target.y - this.y) * alpha;
-            this.z += (target.z - this.z) * alpha;
-            return this;
-        });
-        this.lerpVectors = jest.fn(function(a, b, alpha) {
-            this.x = a.x + (b.x - a.x) * alpha;
-            this.y = a.y + (b.y - a.y) * alpha;
-            this.z = a.z + (b.z - a.z) * alpha;
-            return this;
-        });
-        this.distanceTo = jest.fn(() => 0.15);
-        this.normalize = jest.fn(function() { return this; });
-        this.crossVectors = jest.fn(function() { return this; });
-        this.subVectors = jest.fn(function(a, b) {
-            this.x = a.x - b.x; this.y = a.y - b.y; this.z = a.z - b.z;
-            return this;
-        });
-        this.addVectors = jest.fn(function(a, b) {
-            this.x = a.x + b.x; this.y = a.y + b.y; this.z = a.z + b.z;
-            return this;
-        });
-        this.multiplyScalar = jest.fn(function(s) {
-            this.x *= s; this.y *= s; this.z *= s;
-            return this;
-        });
-        return this;
-    };
-
-    const mockQuaternion = function(x = 0, y = 0, z = 0, w = 1) {
-        this.x = x; this.y = y; this.z = z; this.w = w;
-        this.set = jest.fn(function(x, y, z, w) { this.x = x; this.y = y; this.z = z; this.w = w; return this; });
-        this.copy = jest.fn(function(q) { this.x = q.x; this.y = q.y; this.z = q.z; this.w = q.w; return this; });
-        this.setFromRotationMatrix = jest.fn(function() { return this; });
-        this.setFromAxisAngle = jest.fn(function(axis, angle) {
-            this.x = axis.x * Math.sin(angle / 2);
-            this.y = axis.y * Math.sin(angle / 2);
-            this.z = axis.z * Math.sin(angle / 2);
-            this.w = Math.cos(angle / 2);
-            return this;
-        });
-        this.multiply = jest.fn(function() { return this; });
-        this.normalize = jest.fn(function() { return this; });
-        this.slerp = jest.fn(function() { return this; });
-        return this;
-    };
-
-    const mockMatrix4 = function() {
-        this.makeBasis = jest.fn(function() { return this; });
-        return this;
-    };
-
-    return {
-        Vector3: mockVector3,
-        Quaternion: mockQuaternion,
-        Matrix4: mockMatrix4
-    };
-});
+// Uses the real `three` (jest config does not ignore it) so the body-frame math
+// is exercised for real, matching the unit tests.
 
 // Mock OneEuroFilter
 jest.mock('../../utils/OneEuroFilter', () => ({
@@ -110,7 +47,7 @@ describe('Pose-Garment Rendering Integration', () => {
         }));
 
         // VtoPoseEngine.update doesn't return a value, it modifies the garment
-        vtoPoseEngine.update(poseLandmarks, mockGarment, mockCamera);
+        vtoPoseEngine.update(poseLandmarks, poseLandmarks, mockGarment, mockCamera);
 
         expect(mockGarment.position).toBeDefined();
         expect(mockGarment.scale).toBeDefined();
@@ -136,7 +73,7 @@ describe('Pose-Garment Rendering Integration', () => {
     });
 
     test('should handle invalid landmarks gracefully', () => {
-        vtoPoseEngine.update(null, mockGarment, mockCamera);
+        vtoPoseEngine.update(null, null, mockGarment, mockCamera);
         const headResult = headPoseMapper.update(null, { scale: 1.0 });
 
         expect(mockGarment.position).toBeDefined();
@@ -158,7 +95,7 @@ describe('Pose-Garment Rendering Integration', () => {
         faceLandmarks[152] = { x: 0.5, y: 0.7, z: 0 };
 
         expect(() => {
-            vtoPoseEngine.update(poseLandmarks, mockGarment, mockCamera);
+            vtoPoseEngine.update(poseLandmarks, poseLandmarks, mockGarment, mockCamera);
             const headResult = headPoseMapper.update(faceLandmarks, { scale: 1.0 });
             expect(headResult).not.toBeNull();
         }).not.toThrow();

@@ -36,7 +36,7 @@ const disposeModel = (model) => {
 const VtoCanvas = forwardRef(({ onMeshInfoUpdate, isAccessoryCategory, garmentModelPath }, ref) => {
     const { state } = useStateManager();
     const { isMobileLayout } = useDeviceDetection();
-    const { poseLandmarks, faceLandmarks, canvasDimensions, physicsEnabled } = state.viewState;
+    const { poseLandmarks, poseWorldLandmarks, faceLandmarks, canvasDimensions, physicsEnabled } = state.viewState;
     const { selectedGarment, selectedGender } = state.vtoState;
     const { garmentData } = state.data;
     const garmentDetails = garmentData?.[selectedGender]?.[selectedGarment];
@@ -88,10 +88,11 @@ const VtoCanvas = forwardRef(({ onMeshInfoUpdate, isAccessoryCategory, garmentMo
 
     useEffect(() => {
         stateRef.poseLandmarks = poseLandmarks;
+        stateRef.poseWorldLandmarks = poseWorldLandmarks;
         stateRef.faceLandmarks = faceLandmarks;
         stateRef.isAccessoryCategory = isAccessoryCategory;
         stateRef.garmentDetails = garmentDetails;
-    }, [poseLandmarks, faceLandmarks, isAccessoryCategory, garmentDetails]);
+    }, [poseLandmarks, poseWorldLandmarks, faceLandmarks, isAccessoryCategory, garmentDetails]);
 
     useEffect(() => {
         const mount = mountRef.current;
@@ -139,8 +140,10 @@ const VtoCanvas = forwardRef(({ onMeshInfoUpdate, isAccessoryCategory, garmentMo
         rimLight.position.set(0, 1, -2);
         stateRef.scene.add(rimLight);
 
+        // No negative scale here — mirroring is done at the DOM layer (CSS
+        // scaleX(-1) on the canvas) so the 3D scene stays right-handed and
+        // quaternion-driven bones rotate correctly.
         const worldGroup = new THREE.Group();
-        worldGroup.scale.x = -1;
         stateRef.scene.add(worldGroup);
         stateRef.worldGroup = worldGroup;
 
@@ -173,8 +176,12 @@ const VtoCanvas = forwardRef(({ onMeshInfoUpdate, isAccessoryCategory, garmentMo
                         garmentModel.scale.copy(headTransform.scale);
                     }
                 } else {
-                    poseEngine.update(stateRef.poseLandmarks, garmentModel, camera);
-                    poseMapper.applyPoseToRiggedGarment(garmentModel, stateRef.poseLandmarks, null, currentTime);
+                    // Prefer metric world landmarks; fall back to image landmarks
+                    // (Holistic often returns no world landmarks). The body-frame
+                    // math is scale-relative, so either works for orientation/aim.
+                    const pose3d = stateRef.poseWorldLandmarks || stateRef.poseLandmarks;
+                    poseEngine.update(stateRef.poseLandmarks, pose3d, garmentModel, camera);
+                    poseMapper.applyPoseToRiggedGarment(garmentModel, pose3d, currentTime);
                 }
             }
 
@@ -314,6 +321,6 @@ const VtoCanvas = forwardRef(({ onMeshInfoUpdate, isAccessoryCategory, garmentMo
         };
     }, [garmentModelPath, onMeshInfoUpdate, isMobileLayout]);
 
-    return <div ref={mountRef} style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: 5 }} />;
+    return <div ref={mountRef} style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: 5, transform: 'scaleX(-1)' }} />;
 });
 export default VtoCanvas;

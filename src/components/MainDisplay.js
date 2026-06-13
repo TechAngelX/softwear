@@ -301,6 +301,7 @@ const MainDisplay = ({ onGoHome }) => {
                     }
 
                     const landmarkData = {
+                        poseWorldLandmarks: results.poseWorldLandmarks || null,
                         faceLandmarks: results.faceLandmarks || null,
                         leftHandLandmarks: results.leftHandLandmarks || null,
                         rightHandLandmarks: results.rightHandLandmarks || null

@@ -38,11 +38,13 @@ export const initialState = {
         holisticInitialised: false,
         canvasDimensions: { width: 1280, height: 720 },
         poseLandmarks: null,
+        poseWorldLandmarks: null,
         faceLandmarks: null,
         rightHandLandmarks: null,
         leftHandLandmarks: null,
         isControlPanelOpen: false,
-        gestureEnabled: true,
+        gestureEnabled: false, // TEMPORARILY OFF while tuning garment fit — re-enable later
+
         detectionPaused: false,
         showDebug: false,
         selfieCountdown: null,

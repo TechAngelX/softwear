@@ -1,216 +1,103 @@
 // src/vto/SMPLXBoneMapper.js
 import * as THREE from 'three';
+import { resolveBoneRoles } from './boneRoles';
+import { limbDirection, POSE } from './bodyFrame';
 
-const MEDIAPIPE_LANDMARKS = {
-    NOSE: 0,
-    LEFT_SHOULDER: 11,
-    RIGHT_SHOULDER: 12,
-    LEFT_ELBOW: 13,
-    RIGHT_ELBOW: 14,
-    LEFT_WRIST: 15,
-    RIGHT_WRIST: 16,
-    LEFT_HIP: 23,
-    RIGHT_HIP: 24,
-};
+/**
+ * Drives a rigged garment's ARM bones to follow the user's arms.
+ *
+ * Pose-agnostic: each bone's rest ("bind") direction is read from the actual
+ * skeleton at load, so A-pose or T-pose garments both work — no hardcoded
+ * direction constants. Each bone is aimed in its **parent-local** space (the
+ * previous version assigned a world-space rotation straight to the local
+ * quaternion, which — with the parent chain collar→spine — was the main cause
+ * of the contortion).
+ *
+ * Owns bones only; the garment root transform is owned by VtoPoseEngine.
+ */
+
+// upper-arm bone -> the joint it should point at, and its child bone (for rest axis)
+const ARM_CHAINS = [
+    { bone: 'left_shoulder', child: 'left_elbow', from: POSE.L_SHOULDER, to: POSE.L_ELBOW },
+    { bone: 'right_shoulder', child: 'right_elbow', from: POSE.R_SHOULDER, to: POSE.R_ELBOW },
+    // forearms processed after upper arms so their parent world transform is current
+    { bone: 'left_elbow', child: 'left_wrist', from: POSE.L_ELBOW, to: POSE.L_WRIST },
+    { bone: 'right_elbow', child: 'right_wrist', from: POSE.R_ELBOW, to: POSE.R_WRIST },
+];
 
 export class SMPLXPoseMapper {
     constructor(boneData = {}, isMobile = false) {
         this.initialized = false;
-        this.boneMap = {};
-        this.skeleton = null;
-        this.boneData = boneData;
-        this.lastMorphInfluence = 0.0;
-        this.lastBoneQuaternions = {};
-        this.lastUpdateTime = 0;
+        this.roleMap = {};
+        this.restAxis = {};          // role -> THREE.Vector3 (child dir in bone-local space)
+        this.lastQuat = {};          // role -> THREE.Quaternion (smoothing)
         this.visibilityThreshold = isMobile ? 0.1 : 0.5;
+        this.slerpAmount = isMobile ? 0.5 : 0.35;
 
-        this.bindVectors = this.calculateBindVectors(boneData);
-
-        this.shoulderWidthMultiplier = 1.75;
-        this.downThreshold = -0.85;
-        this.slerpAmount = 0.3;
-
-        this.worldVectors = {
-            up: new THREE.Vector3(0, 1, 0),
-        };
-    }
-
-    calculateBindVectors(boneData) {
-        if (!boneData || !boneData.left_shoulder) {
-            return {
-                leftArm: new THREE.Vector3(1, 0, 0),
-                rightArm: new THREE.Vector3(-1, 0, 0),
-                leftForearm: new THREE.Vector3(1, 0, 0),
-                rightForearm: new THREE.Vector3(-1, 0, 0),
-                spine: new THREE.Vector3(0, 1, 0),
-            };
-        }
-
-        const leftShoulderPos = new THREE.Vector3(...boneData.left_shoulder.head);
-        const leftElbowPos = new THREE.Vector3(...boneData.left_elbow.head);
-        const rightShoulderPos = new THREE.Vector3(...boneData.right_shoulder.head);
-        const rightElbowPos = new THREE.Vector3(...boneData.right_elbow.head);
-        const leftWristPos = new THREE.Vector3(...boneData.left_wrist.head);
-        const rightWristPos = new THREE.Vector3(...boneData.right_wrist.head);
-
-        const leftArmDir = new THREE.Vector3().subVectors(leftElbowPos, leftShoulderPos).normalize();
-        const rightArmDir = new THREE.Vector3().subVectors(rightElbowPos, rightShoulderPos).normalize();
-        const leftForearmDir = new THREE.Vector3().subVectors(leftWristPos, leftElbowPos).normalize();
-        const rightForearmDir = new THREE.Vector3().subVectors(rightWristPos, rightElbowPos).normalize();
-
-        return {
-            leftArm: leftArmDir,
-            rightArm: rightArmDir,
-            leftForearm: leftForearmDir,
-            rightForearm: rightForearmDir,
-            spine: new THREE.Vector3(0, 1, 0),
-        };
+        this._q = new THREE.Quaternion();
+        this._qInv = new THREE.Quaternion();
+        this._target = new THREE.Vector3();
     }
 
     initializeBones(riggedModel) {
-        this.boneMap = {};
-        this.skeleton = null;
-        this.lastBoneQuaternions = {};
+        this.roleMap = {};
+        this.restAxis = {};
+        this.lastQuat = {};
 
-        if (riggedModel) {
-            riggedModel.traverse((object) => {
-                if (object.isSkinnedMesh && object.skeleton) {
-                    this.skeleton = object.skeleton;
-                    object.skeleton.bones.forEach(bone => {
-                        if (bone.name) {
-                            this.boneMap[bone.name] = bone;
-                        }
-                    });
-                }
-            });
-        }
-        this.initialized = Object.keys(this.boneMap).length > 0;
-    }
-
-    applyPoseToRiggedGarment(model, landmarks, filters, timestamp) {
-        if (!this.initialized || !landmarks || !model) {
+        let skeletonBones = [];
+        riggedModel?.traverse((obj) => {
+            if (obj.isSkinnedMesh && obj.skeleton && skeletonBones.length === 0) {
+                skeletonBones = obj.skeleton.bones;
+            }
+        });
+        if (skeletonBones.length === 0) {
+            // No skeleton — static mesh; nothing to drive (root transform still applies).
+            this.initialized = false;
             return;
         }
 
-        if (timestamp - this.lastUpdateTime < 33) {
-            return;
+        this.roleMap = resolveBoneRoles(skeletonBones);
+
+        // Cache each driven bone's rest direction to its child, read from the
+        // ACTUAL bind pose (child's local translation). Works for any pose.
+        for (const chain of ARM_CHAINS) {
+            const bone = this.roleMap[chain.bone];
+            const child = this.roleMap[chain.child];
+            if (!bone || !child) continue;
+            const axis = child.position.clone();
+            if (axis.lengthSq() < 1e-8) continue;
+            this.restAxis[chain.bone] = axis.normalize();
+            this.lastQuat[chain.bone] = bone.quaternion.clone();
         }
-        this.lastUpdateTime = timestamp;
 
-        if (!landmarks[MEDIAPIPE_LANDMARKS.LEFT_SHOULDER] || !landmarks[MEDIAPIPE_LANDMARKS.RIGHT_SHOULDER] ||
-            !landmarks[MEDIAPIPE_LANDMARKS.LEFT_ELBOW] || !landmarks[MEDIAPIPE_LANDMARKS.RIGHT_ELBOW] ||
-            !landmarks[MEDIAPIPE_LANDMARKS.LEFT_WRIST] || !landmarks[MEDIAPIPE_LANDMARKS.RIGHT_WRIST]) {
-            return;
-        }
-
-        const landmarkCache = {};
-
-        const leftShoulder = landmarks[MEDIAPIPE_LANDMARKS.LEFT_SHOULDER];
-        const rightShoulder = landmarks[MEDIAPIPE_LANDMARKS.RIGHT_SHOULDER];
-        const shoulderCenterX = (leftShoulder.x + rightShoulder.x) / 2;
-
-        const getLandmark = (index) => {
-            if (!landmarkCache[index]) {
-                const { x, y, z } = landmarks[index];
-
-                if (landmarks[index].visibility < this.visibilityThreshold) {
-                    landmarkCache[index] = new THREE.Vector3(0, 0, 0);
-                    return landmarkCache[index];
-                }
-
-                let finalX = x;
-                if ([11, 13, 15].includes(index)) {
-                    finalX = shoulderCenterX - (shoulderCenterX - x) * this.shoulderWidthMultiplier;
-                } else if ([12, 14, 16].includes(index)) {
-                    finalX = shoulderCenterX + (x - shoulderCenterX) * this.shoulderWidthMultiplier;
-                }
-
-                landmarkCache[index] = new THREE.Vector3(
-                    (finalX - 0.5) * 2,
-                    -(y - 0.5) * 2,
-                    -z * 2
-                );
-            }
-            return landmarkCache[index];
-        };
-
-        const shoulderMidpoint = new THREE.Vector3().addVectors(
-            getLandmark(MEDIAPIPE_LANDMARKS.LEFT_SHOULDER),
-            getLandmark(MEDIAPIPE_LANDMARKS.RIGHT_SHOULDER)
-        ).multiplyScalar(0.5);
-        const hipMidpoint = new THREE.Vector3().addVectors(
-            getLandmark(MEDIAPIPE_LANDMARKS.LEFT_HIP),
-            getLandmark(MEDIAPIPE_LANDMARKS.RIGHT_HIP)
-        ).multiplyScalar(0.5);
-        const torsoRotation = this.calculateBoneRotation(hipMidpoint, shoulderMidpoint, this.bindVectors.spine);
-
-        const spineBones = ['spine1', 'spine2', 'spine3'];
-        spineBones.forEach((boneName, index) => {
-            if (this.boneMap[boneName] && filters && filters[boneName]) {
-                const partialRotation = new THREE.Quaternion().slerp(torsoRotation, (index + 1) / spineBones.length * 0.5);
-                const smoothed = this.filterQuaternion(partialRotation, torsoRotation, timestamp);
-                this.boneMap[boneName].quaternion.copy(smoothed);
-            }
-        });
-
-        const leftArmVec = new THREE.Vector3().subVectors(getLandmark(MEDIAPIPE_LANDMARKS.LEFT_WRIST), getLandmark(MEDIAPIPE_LANDMARKS.LEFT_SHOULDER)).normalize();
-        const rightArmVec = new THREE.Vector3().subVectors(getLandmark(MEDIAPIPE_LANDMARKS.RIGHT_WRIST), getLandmark(MEDIAPIPE_LANDMARKS.RIGHT_SHOULDER)).normalize();
-        const isLeftArmDown = leftArmVec.y < this.downThreshold;
-        const isRightArmDown = rightArmVec.y < this.downThreshold;
-
-        const armBones = {
-            'left_shoulder': () => this.calculateBoneRotation(getLandmark(MEDIAPIPE_LANDMARKS.LEFT_SHOULDER), getLandmark(MEDIAPIPE_LANDMARKS.LEFT_ELBOW), this.bindVectors.leftArm),
-            'right_shoulder': () => this.calculateBoneRotation(getLandmark(MEDIAPIPE_LANDMARKS.RIGHT_SHOULDER), getLandmark(MEDIAPIPE_LANDMARKS.RIGHT_ELBOW), this.bindVectors.rightArm),
-            'left_elbow': () => this.calculateBoneRotation(getLandmark(MEDIAPIPE_LANDMARKS.LEFT_ELBOW), getLandmark(MEDIAPIPE_LANDMARKS.LEFT_WRIST), this.bindVectors.leftForearm),
-            'right_elbow': () => this.calculateBoneRotation(getLandmark(MEDIAPIPE_LANDMARKS.RIGHT_ELBOW), getLandmark(MEDIAPIPE_LANDMARKS.RIGHT_WRIST), this.bindVectors.rightForearm),
-        };
-
-        Object.keys(armBones).forEach(boneName => {
-            if (!this.boneMap[boneName]) return;
-
-            const isLeft = boneName.includes('left');
-            if ((isLeft && isLeftArmDown) || (!isLeft && isRightArmDown)) {
-                return;
-            }
-
-            const targetQuaternion = armBones[boneName]();
-            const lastQuat = this.lastBoneQuaternions[boneName] || this.boneMap[boneName].quaternion.clone();
-            lastQuat.slerp(targetQuaternion, this.slerpAmount);
-            this.boneMap[boneName].quaternion.copy(lastQuat);
-            this.lastBoneQuaternions[boneName] = lastQuat.clone();
-        });
-
-        model.traverse((node) => {
-            if (node.isSkinnedMesh && node.morphTargetInfluences && node.morphTargetInfluences.length > 0) {
-                const time = timestamp * 0.001;
-                const rawInfluence = (Math.sin(time) + 1) / 2;
-                const MAX_INFLUENCE = 1.0;
-                const targetInfluence = Math.min(rawInfluence, MAX_INFLUENCE);
-                this.lastMorphInfluence += (targetInfluence - this.lastMorphInfluence) * 0.05;
-                node.morphTargetInfluences[0] = this.lastMorphInfluence;
-            }
-        });
+        this.initialized = Object.keys(this.restAxis).length > 0;
     }
 
-    calculateBoneRotation(p1, p2, bindVector) {
-        const direction = new THREE.Vector3().subVectors(p2, p1);
-        if (direction.lengthSq() < 0.0001) {
-            return new THREE.Quaternion();
-        }
-        direction.normalize();
-        return new THREE.Quaternion().setFromUnitVectors(bindVector, direction);
-    }
+    /**
+     * @param {THREE.Object3D} model - garment wrapper (root transform already set)
+     * @param {Array} worldLandmarks - MediaPipe poseWorldLandmarks (metric)
+     */
+    applyPoseToRiggedGarment(model, worldLandmarks, timestamp) {
+        if (!this.initialized || !worldLandmarks || !model) return;
 
-    filterQuaternion(quaternion, filterSet, timestamp) {
-        if (!filterSet) {
-            return quaternion;
+        for (const chain of ARM_CHAINS) {
+            const bone = this.roleMap[chain.bone];
+            const restAxis = this.restAxis[chain.bone];
+            if (!bone || !restAxis || !bone.parent) continue;
+
+            const dirScene = limbDirection(worldLandmarks, chain.from, chain.to, this.visibilityThreshold);
+            if (!dirScene) continue; // low confidence — hold last rotation
+
+            // Convert the desired child direction from scene space into the
+            // bone's parent-local space, then aim the rest axis at it.
+            bone.parent.getWorldQuaternion(this._q);      // refreshes parent chain (incl. just-set upper arm)
+            this._qInv.copy(this._q).invert();
+            this._target.copy(dirScene).applyQuaternion(this._qInv).normalize();
+
+            const targetQuat = new THREE.Quaternion().setFromUnitVectors(restAxis, this._target);
+            const smoothed = this.lastQuat[chain.bone];
+            smoothed.slerp(targetQuat, this.slerpAmount);
+            bone.quaternion.copy(smoothed);
         }
-        const smoothed = new THREE.Quaternion(
-            filterSet.x ? filterSet.x.filter(quaternion.x, timestamp) : quaternion.x,
-            filterSet.y ? filterSet.y.filter(quaternion.y, timestamp) : quaternion.y,
-            filterSet.z ? filterSet.z.filter(quaternion.z, timestamp) : quaternion.z,
-            filterSet.w ? filterSet.w.filter(quaternion.w, timestamp) : quaternion.w
-        );
-        return smoothed.normalize();
     }
 }

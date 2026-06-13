@@ -72,10 +72,14 @@ jest.mock('three', () => {
             slerp: jest.fn(),
             copy: jest.fn(),
         })),
-        Box3: jest.fn(() => ({
-            setFromObject: jest.fn(),
-            getCenter: jest.fn(() => mockVector3()),
-        })),
+        Box3: jest.fn(() => {
+            const box = {
+                setFromObject: jest.fn(() => box),
+                getCenter: jest.fn(() => mockVector3()),
+                getSize: jest.fn(() => mockVector3()),
+            };
+            return box;
+        }),
         SRGBColorSpace: {},
         ACESFilmicToneMapping: {}
     };
@@ -190,7 +194,17 @@ describe('VtoCanvas', () => {
             dispose: jest.fn(),
         }));
 
-        const mockGltf = { scene: new THREE.Group() };
+        const makeVec = () => ({ set: jest.fn(), setScalar: jest.fn(), copy: jest.fn(), x: 0, y: 0, z: 0 });
+        const mockGltf = {
+            scene: {
+                position: makeVec(),
+                scale: makeVec(),
+                quaternion: { slerp: jest.fn(), copy: jest.fn() },
+                traverse: jest.fn((cb) => {
+                    cb({ isMesh: true, isSkinnedMesh: false, material: {}, geometry: { attributes: { position: { count: 100 } } } });
+                }),
+            },
+        };
         GLTFLoader.mockImplementation(() => ({
             setDRACOLoader: jest.fn(),
             load: jest.fn((url, onLoad) => {

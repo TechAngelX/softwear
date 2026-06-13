@@ -52,7 +52,7 @@ const getMobileDimensions = () => {
 const MobileView = React.forwardRef((props, ref) => {
     const { state, dispatch } = useStateManager();
     const { selectedGender, selectedGarment, isSwitchingGender, physicsEnabled, activeCategoryIndex, selectedBackground } = state.vtoState;
-    const { poseLandmarks, selfieCountdown, holisticInitialised, faceLandmarks, rightHandLandmarks, leftHandLandmarks, cameraError, gestureEnabled, detectionPaused } = state.viewState;
+    const { poseLandmarks, poseWorldLandmarks, selfieCountdown, holisticInitialised, faceLandmarks, rightHandLandmarks, leftHandLandmarks, cameraError, gestureEnabled, detectionPaused } = state.viewState;
     const { garmentMenu, garmentData, boneData } = state.data;
     const { isMobileLayout, deviceInfo } = useDeviceDetection();
 
@@ -65,6 +65,7 @@ const MobileView = React.forwardRef((props, ref) => {
     const garmentModelRef = useRef(null);
     const animationFrameRef = useRef(null);
     const latestLandmarksRef = useRef(null);
+    const latestWorldLandmarksRef = useRef(null);
 
     const [loadingProgress, setLoadingProgress] = useState(0);
     const [modelLoadError, setModelLoadError] = useState(null);
@@ -81,6 +82,10 @@ const MobileView = React.forwardRef((props, ref) => {
     useEffect(() => {
         latestLandmarksRef.current = poseLandmarks;
     }, [poseLandmarks]);
+
+    useEffect(() => {
+        latestWorldLandmarksRef.current = poseWorldLandmarks;
+    }, [poseWorldLandmarks]);
 
     useEffect(() => {
         if (!poseEngineRef.current) {
@@ -354,6 +359,7 @@ const MobileView = React.forwardRef((props, ref) => {
 
             const currentTime = Date.now();
             const currentLandmarks = latestLandmarksRef.current;
+            const currentWorldLandmarks = latestWorldLandmarksRef.current;
 
             if (garmentModelRef.current && poseEngineRef.current) {
                 if (currentLandmarks && currentLandmarks.length > 0) {
@@ -368,9 +374,10 @@ const MobileView = React.forwardRef((props, ref) => {
                     } else {
                         garmentModelRef.current.visible = true;
                         try {
-                            poseEngineRef.current.update(currentLandmarks, garmentModelRef.current, cameraRef.current);
+                            const pose3d = currentWorldLandmarks || currentLandmarks;
+                            poseEngineRef.current.update(currentLandmarks, pose3d, garmentModelRef.current, cameraRef.current);
                             if (poseMapperRef.current) {
-                                poseMapperRef.current.applyPoseToRiggedGarment(garmentModelRef.current, currentLandmarks, null, currentTime);
+                                poseMapperRef.current.applyPoseToRiggedGarment(garmentModelRef.current, pose3d, currentTime);
                             }
                         } catch (error) {
                             console.error('Pose update error:', error);
@@ -548,6 +555,7 @@ const MobileView = React.forwardRef((props, ref) => {
                     }
 
                     dispatch({ type: ACTIONS.SET_VIEW_STATE, payload: {
+                            poseWorldLandmarks: results.poseWorldLandmarks || null,
                             faceLandmarks: results.faceLandmarks || null,
                             leftHandLandmarks: results.leftHandLandmarks || null,
                             rightHandLandmarks: results.rightHandLandmarks || null
@@ -605,7 +613,8 @@ const MobileView = React.forwardRef((props, ref) => {
                     width: '100%',
                     height: '100%',
                     pointerEvents: 'none',
-                    zIndex: 5
+                    zIndex: 5,
+                    transform: 'scaleX(-1)'
                 }}
             />
 
