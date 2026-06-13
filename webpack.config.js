@@ -118,5 +118,10 @@ module.exports = (env, argv) => {
     },
     resolve: { extensions: ['.js', '.jsx'] },
     experiments: { asyncWebAssembly: true },
+    // MediaPipe Tasks Vision resolves its wasm path dynamically; harmless.
+    ignoreWarnings: [
+      { module: /@mediapipe[\\/]tasks-vision/ },
+      /Critical dependency: the request of a dependency is an expression/,
+    ],
   };
 };

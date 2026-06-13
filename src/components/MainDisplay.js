@@ -21,6 +21,7 @@ import {
 } from '@mediapipe/holistic';
 import { SelfieService } from '../utils/SelfieService';
 import { initialiseGlobalHolistic } from '../vto/holisticManager';
+import { initPoseLandmarker, detectWorldLandmarks } from '../vto/poseLandmarkerManager';
 
 const backgroundImages = {};
 const preloadBackgroundImage = (bgId) => {
@@ -270,6 +271,16 @@ const MainDisplay = ({ onGoHome }) => {
                     throw new Error('Holistic instance is null');
                 }
 
+                // Real metric 3D landmarks (non-fatal if it fails — engine falls
+                // back to image landmarks).
+                let poseReady = false;
+                try {
+                    await initPoseLandmarker();
+                    poseReady = true;
+                } catch (e) {
+                    console.warn('World-landmark pose model unavailable; using image landmarks.');
+                }
+
                 holistic.onResults((results) => {
                     if (!canvasElement.current) return;
 
@@ -329,7 +340,15 @@ const MainDisplay = ({ onGoHome }) => {
                         ctx.restore();
                     }
                 });
-                const onFrame = async () => await holistic.send({ image: video });
+                const onFrame = async () => {
+                    await holistic.send({ image: video });
+                    if (poseReady) {
+                        const world = detectWorldLandmarks(video, performance.now());
+                        if (world) {
+                            dispatch({ type: ACTIONS.SET_VIEW_STATE, payload: { poseWorldLandmarks: world } });
+                        }
+                    }
+                };
                 await cameraManager.startCamera(video, onFrame);
                 dispatch({ type: ACTIONS.SET_VIEW_STATE, payload: { holisticInitialised: true } });
 
