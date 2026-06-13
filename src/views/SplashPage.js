@@ -96,6 +96,7 @@ const SplashPage = ({ onEnter }) => {
         let isTransitioning = false;
         let cameraMode = 0;
         let lastCameraChange = 0;
+        let lastElapsed = 0;
 
         const DISPLAY_TIME = isMobile ? 10000 : 6000;
         const CAMERA_CHANGE_TIME = 8000;
@@ -401,7 +402,7 @@ const SplashPage = ({ onEnter }) => {
         const showModel = (modelInfo) => {
             const cached = preloadCache.get(modelInfo.catalogueKey);
             if (cached) {
-                preloadCache.delete(modelInfo.catalogueKey);
+                // Keep the parsed model cached so repeat cycles are instant (no re-parse hitch)
                 swapModel(cached, modelInfo);
             } else {
                 const garment = catalogueData[modelInfo.gender]?.[modelInfo.catalogueKey];
@@ -410,6 +411,7 @@ const SplashPage = ({ onEnter }) => {
                 if (!path) return;
 
                 gltfLoader.load(path, (gltf) => {
+                    preloadCache.set(modelInfo.catalogueKey, gltf);
                     swapModel(gltf, modelInfo);
                 }, undefined, (error) => {
                     console.error('Error loading 3D model:', error);
@@ -617,6 +619,10 @@ const SplashPage = ({ onEnter }) => {
         function animate() {
             animFrameId = requestAnimationFrame(animate);
             const elapsedTime = clock.getElapsedTime();
+            // Frame-rate-independent step, clamped so a tab-switch can't cause a jump
+            const delta = Math.min(elapsedTime - lastElapsed, 0.05);
+            lastElapsed = elapsedTime;
+            const dt60 = delta * 60;
             const now = Date.now();
 
             updateCameraOrbit(elapsedTime);
@@ -636,8 +642,8 @@ const SplashPage = ({ onEnter }) => {
             }
 
             if (currentModel) {
-                const baseRotation = currentModel.userData.rotationSpeed * 0.01;
-                const dynamicRotation = Math.sin(elapsedTime * 0.5) * 0.008;
+                const baseRotation = currentModel.userData.rotationSpeed * 0.01 * dt60;
+                const dynamicRotation = Math.sin(elapsedTime * 0.5) * 0.008 * dt60;
                 currentModel.rotation.y += baseRotation + dynamicRotation;
 
                 const bob = Math.sin(elapsedTime * 2.0) * 0.1;
@@ -734,37 +740,39 @@ const SplashPage = ({ onEnter }) => {
                             <div className={`splash-content ${isIntroDone ? 'loaded' : ''}`}>
                                 <div className="hero-text-container">
                                     <div className="hero-badge">
-                                        <span className="badge-text">Next-Generation Virtual Try-On</span>
+                                        <span className="badge-text">Virtual Try-On Platform</span>
                                     </div>
                                     <h1 className="main-splash-title-hero">
                                         <span className="title-line-hero">softWEAR</span>
                                     </h1>
                                     <h2 className="splash-title-hero">
-                                        <span className="title-line-hero">The Future of</span>
-                                        <span className="title-line-hero">Fashion</span>
+                                        <span className="title-line-hero">Try on real clothes</span>
+                                        <span className="title-line-hero">using your camera</span>
                                     </h2>
                                     <p className="splash-description-hero">
-                                        Experience virtual try-on like never before. Interactive, immersive,
-                                        and intelligent fashion technology that transforms how you shop.
+                                        softWEAR maps your body in real time and fits 3D garments to your
+                                        movement. Nothing is uploaded — tracking and rendering run entirely
+                                        in your browser, on your device.
                                     </p>
+
                                     <div className="feature-highlights">
                                         <div className="feature">
-                                            <span className="feature-icon">&#9889;</span>
-                                            <span>Real-Time</span>
+                                            <span className="feature-icon" aria-hidden="true">&#9889;</span>
+                                            <span>Real-time tracking</span>
                                         </div>
                                         <div className="feature">
-                                            <span className="feature-icon">&#10024;</span>
-                                            <span>AI-Powered</span>
+                                            <span className="feature-icon" aria-hidden="true">&#128274;</span>
+                                            <span>On-device &amp; private</span>
                                         </div>
                                         <div className="feature">
-                                            <span className="feature-icon">&#9757;</span>
-                                            <span>Interactive</span>
+                                            <span className="feature-icon" aria-hidden="true">&#127760;</span>
+                                            <span>Runs in your browser</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="cta-section">
-                                    <button onClick={handleEnterExperience} className="primary-btn">
-                                        <span>Enter Experience</span>
+                                    <button type="button" onClick={handleEnterExperience} className="primary-btn">
+                                        <span>Launch Try-On</span>
                                     </button>
                                 </div>
                             </div>

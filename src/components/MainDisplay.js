@@ -1,7 +1,6 @@
 // src/components/MainDisplay.js
 
 import React, { useRef, useEffect, useState, useMemo } from 'react';
-import { Holistic } from '@mediapipe/holistic';
 import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils';
 import { useDeviceDetection } from '../utils/DeviceDetectionContext';
 import { useStateManager, ACTIONS } from '../stateManager';
@@ -21,8 +20,7 @@ import {
     HAND_CONNECTIONS
 } from '@mediapipe/holistic';
 import { SelfieService } from '../utils/SelfieService';
-let globalHolistic = null;
-let isHolisticInitialising = false;
+import { initialiseGlobalHolistic } from '../vto/holisticManager';
 
 const backgroundImages = {};
 const preloadBackgroundImage = (bgId) => {
@@ -30,11 +28,9 @@ const preloadBackgroundImage = (bgId) => {
         const img = new Image();
         img.onload = () => {
             backgroundImages[bgId] = img;
-            console.log(`Background ${bgId} loaded successfully`);
         };
-        img.onerror = (error) => {
-            console.error(`Failed to load background ${bgId}:`, error);
-            console.error(`Attempted path: ./images/${bgId}.webp`);
+        img.onerror = () => {
+            console.error(`Failed to load background image: ./images/${bgId}.webp`);
         };
         img.src = `./images/${bgId}.webp`;
     }
@@ -57,7 +53,7 @@ const MainDisplay = ({ onGoHome }) => {
     const { state, dispatch } = useStateManager();
     const { selectedGender, selectedGarment, isSwitchingGender, isDetecting, showLandmarks, showGarment, bodyModelMode, physicsEnabled, selectedBackground, activeCategoryIndex } = state.vtoState;
     const { garmentMenu, garmentData, boneData } = state.data;
-    const { holisticInitialised, canvasDimensions, poseLandmarks, faceLandmarks, rightHandLandmarks, leftHandLandmarks, isControlPanelOpen, gestureEnabled } = state.viewState;
+    const { holisticInitialised, canvasDimensions, poseLandmarks, faceLandmarks, rightHandLandmarks, leftHandLandmarks, isControlPanelOpen, gestureEnabled, cameraError } = state.viewState;
     const [confirmedCategoryIndex, setConfirmedCategoryIndex] = useState(null);
     const videoElement = useRef(null);
     const canvasElement = useRef(null);
@@ -140,73 +136,6 @@ const MainDisplay = ({ onGoHome }) => {
 
         fetchBoneData();
     }, [selectedGender, dispatch]);
-    useEffect(() => {
-        if (selectedBackground) {
-            preloadBackgroundImage(selectedBackground);
-        }
-    }, [selectedBackground]);
-    useEffect(() => {
-        if (!selectedBackground) {
-            console.log('Selected background:', selectedBackground);
-            console.log('Background class should be:', `bg-${selectedBackground}`);
-        } else {
-            const img = new Image();
-            img.onload = () => {
-                console.log(`Wardrobe background ${selectedBackground} loaded successfully`);
-            };
-            img.onerror = () => {
-                console.error(`Failed to load wardrobe background: ${selectedBackground}`);
-                console.error(`Image path attempted: ./images/${selectedBackground}.webp`);
-            };
-            img.src = `./images/${selectedBackground}.webp`;
-
-        }
-        setTimeout(() => {
-            const videoPanel = document.querySelector('.main-video-panel');
-            if (videoPanel) {
-                console.log('Video panel classes:', videoPanel.className);
-                console.log('Computed background-image:', window.getComputedStyle(videoPanel).backgroundImage);
-            }
-        }, 100);
-    }, [selectedBackground, dispatch]);
-    const initialiseGlobalHolistic = async () => {
-        if (globalHolistic || isHolisticInitialising) return globalHolistic;
-        isHolisticInitialising = true;
-
-        try {
-            console.log('Creating Holistic instance...');
-            const holistic = new Holistic({
-                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`
-            });
-            if (!holistic) {
-                throw new Error('Failed to create Holistic instance');
-            }
-
-            console.log('Holistic instance created, setting options...');
-            holistic.setOptions({
-                selfieMode: false,
-                modelComplexity: isMobileLayout ? 0 : 1,
-                smoothLandmarks: false,
-                enableSegmentation: true,
-                smoothSegmentation: true,
-                refineFaceLandmarks: false,
-                minDetectionConfidence: isMobileLayout ? 0.4 : 0.5,
-                minTrackingConfidence: isMobileLayout ? 0.3 : 0.5
-            });
-            console.log('Initializing holistic...');
-            await holistic.initialize();
-
-            console.log('Holistic initialized successfully');
-            globalHolistic = holistic;
-            return holistic;
-        } catch (error) {
-            console.error("Failed to create global holistic:", error);
-            globalHolistic = null;
-            throw error;
-        } finally {
-            isHolisticInitialising = false;
-        }
-    };
 
     const handleInitialGenderSelection = (gender) => {
         audioManager.playSound(gender === 'male' ? 'maleSelected' : 'femaleSelected');
@@ -334,14 +263,13 @@ const MainDisplay = ({ onGoHome }) => {
             canvas.height = canvasDimensions.height;
 
             try {
-                const holistic = await initialiseGlobalHolistic();
+                dispatch({ type: ACTIONS.SET_VIEW_STATE, payload: { cameraError: null } });
+                const holistic = await initialiseGlobalHolistic(isMobileLayout);
 
                 if (!holistic) {
                     throw new Error('Holistic instance is null');
                 }
 
-
-                console.log('Setting up holistic onResults callback...');
                 holistic.onResults((results) => {
                     if (!canvasElement.current) return;
 
@@ -406,6 +334,15 @@ const MainDisplay = ({ onGoHome }) => {
 
             } catch (error) {
                 console.error("Failed to initialise MediaPipe:", error);
+                let message = 'We could not start the virtual try-on. Please refresh and try again.';
+                if (error && (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError')) {
+                    message = 'Camera access was blocked. Please allow camera permission in your browser and refresh.';
+                } else if (error && (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError')) {
+                    message = 'No camera was found. Connect a webcam and refresh to start the try-on.';
+                } else if (error && (error.name === 'NotReadableError' || error.name === 'TrackStartError')) {
+                    message = 'Your camera is in use by another app. Close it and refresh to continue.';
+                }
+                dispatch({ type: ACTIONS.SET_VIEW_STATE, payload: { cameraError: message } });
             }
         };
 
@@ -459,17 +396,25 @@ const MainDisplay = ({ onGoHome }) => {
 
     return (
         <div className={`virtual-tryon-container ${genderThemeClass}`}>
-            <div className={`overlay-backdrop ${isControlPanelOpen ? 'open' : ''}`} onClick={() => dispatch({ type: ACTIONS.SET_VIEW_STATE, payload: { isControlPanelOpen: false } })} />
+            <div className={`overlay-backdrop ${isControlPanelOpen ? 'open' : ''}`} onClick={() => dispatch({ type: ACTIONS.SET_VIEW_STATE, payload: { isControlPanelOpen: false } })} aria-hidden="true" />
 
-            <button className={`menu-toggle-btn ${isControlPanelOpen ? 'open' : ''}`} onClick={() => dispatch({ type: ACTIONS.SET_VIEW_STATE, payload: { isControlPanelOpen: !isControlPanelOpen } })} aria-label="Toggle controls">
-                <div className="bar"></div><div className="bar"></div><div className="bar"></div>
+            <button
+                type="button"
+                className={`menu-toggle-btn ${isControlPanelOpen ? 'open' : ''}`}
+                onClick={() => dispatch({ type: ACTIONS.SET_VIEW_STATE, payload: { isControlPanelOpen: !isControlPanelOpen } })}
+                aria-label={isControlPanelOpen ? 'Close controls panel' : 'Open controls panel'}
+                aria-expanded={isControlPanelOpen}
+                aria-controls="control-sidebar"
+            >
+                <div className="bar" aria-hidden="true"></div><div className="bar" aria-hidden="true"></div><div className="bar" aria-hidden="true"></div>
             </button>
 
-            <div className="tryon-content">
+            <main className="tryon-content">
                 <VtoViewPanel
                     videoElement={videoElement}
                     canvasElement={canvasElement}
                     holisticInitialised={holisticInitialised && !isSwitchingGender}
+                    cameraError={cameraError}
                     landmarks={{
                         poseLandmarks,
                         faceLandmarks,
@@ -502,15 +447,20 @@ const MainDisplay = ({ onGoHome }) => {
                     )}
                 </VtoViewPanel>
 
-                <div className={`control-sidebar ${isControlPanelOpen ?
-                    'open' : ''}`}>
-                    <button className="close-panel-btn" onClick={() => dispatch({ type: ACTIONS.SET_VIEW_STATE, payload: { isControlPanelOpen: false } })}>×</button>
+                <aside
+                    id="control-sidebar"
+                    className={`control-sidebar ${isControlPanelOpen ?
+                    'open' : ''}`}
+                    aria-label="Try-on controls"
+                    aria-hidden={!isControlPanelOpen}
+                >
+                    <button type="button" className="close-panel-btn" onClick={() => dispatch({ type: ACTIONS.SET_VIEW_STATE, payload: { isControlPanelOpen: false } })} aria-label="Close controls panel">×</button>
 
                     {garmentMenu && (
                         <>
                             <div className="component-container">
                                 <h3 className="component-title">Navigation</h3>
-                                <button onClick={onGoHome} className="home-bar-btn" title="Return to Home Screen">
+                                <button type="button" onClick={onGoHome} className="home-bar-btn" title="Return to Home Screen">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                                         <polyline points="9 22 9 12 15 12 15 22"></polyline>
@@ -521,10 +471,10 @@ const MainDisplay = ({ onGoHome }) => {
 
                             <div className="component-container">
                                 <h3 className="component-title">Change Model Type</h3>
-                                <div className="gender-toggle-container">
-                                    <button onClick={() => handleGenderChange('male')} className={`gender-toggle-btn ${selectedGender === 'male' ? 'active' : ''}`} disabled={isSwitchingGender}>Male</button>
-                                    <button onClick={() => handleGenderChange('female')} className={`gender-toggle-btn ${selectedGender === 'female' ?
-                                        'active' : ''}`} disabled={isSwitchingGender}>Female</button>
+                                <div className="gender-toggle-container" role="group" aria-label="Model type">
+                                    <button type="button" onClick={() => handleGenderChange('male')} className={`gender-toggle-btn ${selectedGender === 'male' ? 'active' : ''}`} disabled={isSwitchingGender} aria-pressed={selectedGender === 'male'}>Male</button>
+                                    <button type="button" onClick={() => handleGenderChange('female')} className={`gender-toggle-btn ${selectedGender === 'female' ?
+                                        'active' : ''}`} disabled={isSwitchingGender} aria-pressed={selectedGender === 'female'}>Female</button>
                                 </div>
                             </div>
 
@@ -562,8 +512,8 @@ const MainDisplay = ({ onGoHome }) => {
                         selectedGender={selectedGender}
                         garmentData={garmentData}
                     />
-                </div>
-            </div>
+                </aside>
+            </main>
         </div>
     );
 };

@@ -10,11 +10,16 @@ import { VtoPoseEngine } from '../vto/VtoPoseEngine';
 import { HeadPoseMapper } from '../vto/HeadPoseMapper';
 import { SMPLXPoseMapper } from '../vto/SMPLXBoneMapper';
 import GarmentChooser from '../components/GarmentChooser';
+import { GestureDetector } from '../gestures/GestureDetector';
+import GestureIndicator from '../gestures/GestureIndicator';
+import GestureFeedback from '../gestures/GestureFeedback';
+import { SelfieService } from '../utils/SelfieService';
 import { useStateManager, ACTIONS } from '../stateManager';
 import SelfieButton from '../components/SelfieButton';
 import { useDeviceDetection } from '../utils/DeviceDetectionContext';
 import { GarmentPhysics } from '../vto/garmentPhysics';
 import cameraManager from '../utils/CameraManager';
+import { initialiseGlobalHolistic } from '../vto/holisticManager';
 import { applySegmentationWithBackground } from '../vto/greenscreen';
 import { OneEuroFilter } from '../utils/OneEuroFilter';
 import { audioManager } from '../utils/AudioManager';
@@ -47,7 +52,7 @@ const getMobileDimensions = () => {
 const MobileView = React.forwardRef((props, ref) => {
     const { state, dispatch } = useStateManager();
     const { selectedGender, selectedGarment, isSwitchingGender, physicsEnabled, activeCategoryIndex, selectedBackground } = state.vtoState;
-    const { poseLandmarks, selfieCountdown, holisticInitialised, faceLandmarks, rightHandLandmarks, leftHandLandmarks } = state.viewState;
+    const { poseLandmarks, selfieCountdown, holisticInitialised, faceLandmarks, rightHandLandmarks, leftHandLandmarks, cameraError, gestureEnabled, detectionPaused } = state.viewState;
     const { garmentMenu, garmentData, boneData } = state.data;
     const { isMobileLayout, deviceInfo } = useDeviceDetection();
 
@@ -64,6 +69,9 @@ const MobileView = React.forwardRef((props, ref) => {
     const [loadingProgress, setLoadingProgress] = useState(0);
     const [modelLoadError, setModelLoadError] = useState(null);
     const [mobileDimensions, setMobileDimensions] = useState(() => getMobileDimensions());
+    const [activeGesture, setActiveGesture] = useState(null);
+    const [pendingGesture, setPendingGesture] = useState(null);
+    const [gestureDetector] = useState(() => new GestureDetector());
 
     const poseEngineRef = useRef(null);
     const headPoseMapperRef = useRef(new HeadPoseMapper(boneData));
@@ -72,13 +80,11 @@ const MobileView = React.forwardRef((props, ref) => {
 
     useEffect(() => {
         latestLandmarksRef.current = poseLandmarks;
-        console.log('Landmarks updated:', poseLandmarks?.length || 0);
     }, [poseLandmarks]);
 
     useEffect(() => {
         if (!poseEngineRef.current) {
             poseEngineRef.current = new VtoPoseEngine();
-            console.log('Created pose engine');
         }
     }, []);
 
@@ -188,6 +194,125 @@ const MobileView = React.forwardRef((props, ref) => {
         const nextIndex = (currentIndex + 1) % backgrounds.length;
         dispatch({ type: ACTIONS.SET_VTO_STATE, payload: { selectedBackground: backgrounds[nextIndex] } });
     };
+
+    // --- Gesture control (same engine as desktop) ---
+    const flatGarmentList = useMemo(() => {
+        if (!garmentMenu || !selectedGender) return [];
+        const category = garmentMenu[selectedGender]?.[activeCategoryIndex];
+        return category ? category.items.map(item => item.id) : [];
+    }, [garmentMenu, selectedGender, activeCategoryIndex]);
+
+    const handleGarmentChangeByGesture = (direction) => {
+        if (flatGarmentList.length === 0) return;
+        const currentIndex = flatGarmentList.indexOf(selectedGarment);
+        if (currentIndex === -1) {
+            handleSelectGarment(flatGarmentList[0]);
+            return;
+        }
+        const nextIndex = direction === 'next'
+            ? (currentIndex + 1) % flatGarmentList.length
+            : (currentIndex - 1 + flatGarmentList.length) % flatGarmentList.length;
+        handleSelectGarment(flatGarmentList[nextIndex]);
+    };
+
+    const handleCategoryChangeByGesture = (direction = 'next') => {
+        const total = getCurrentGarments().length;
+        if (total === 0) return;
+        const nextIndex = direction === 'next'
+            ? (activeCategoryIndex + 1) % total
+            : (activeCategoryIndex - 1 + total) % total;
+        handleCategoryChange(nextIndex);
+    };
+
+    const captureSelfieBlob = async () => {
+        const backgroundCanvas = canvasElement.current;
+        const threeCanvas = rendererRef.current?.domElement;
+        if (!backgroundCanvas || !threeCanvas) {
+            throw new Error('Selfie failed: Missing canvas elements');
+        }
+        const compositeCanvas = document.createElement('canvas');
+        const scale = 2;
+        compositeCanvas.width = mobileDimensions.width * scale;
+        compositeCanvas.height = mobileDimensions.height * scale;
+        const ctx = compositeCanvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.save();
+        ctx.scale(-1, 1);
+        ctx.translate(-compositeCanvas.width, 0);
+        ctx.drawImage(backgroundCanvas, 0, 0, compositeCanvas.width, compositeCanvas.height);
+        ctx.restore();
+        ctx.drawImage(threeCanvas, 0, 0, compositeCanvas.width, compositeCanvas.height);
+        ctx.font = `${12 * scale}px SF Pro Display`;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.textAlign = 'right';
+        ctx.fillText('softWEAR', compositeCanvas.width - (10 * scale), compositeCanvas.height - (10 * scale));
+        return new Promise((resolve, reject) => {
+            compositeCanvas.toBlob((blob) => {
+                blob ? resolve(blob) : reject(new Error('Failed to create image blob'));
+            }, 'image/png', 0.95);
+        });
+    };
+
+    const handleSelfieGesture = async () => {
+        if (!selectedGarment) return;
+        const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+        try {
+            dispatch({ type: ACTIONS.SET_VIEW_STATE, payload: { selfieCountdown: 'Get Ready!' } });
+            await wait(1000);
+            for (const n of [3, 2, 1]) {
+                dispatch({ type: ACTIONS.SET_VIEW_STATE, payload: { selfieCountdown: n } });
+                await wait(1000);
+            }
+            audioManager.playSound('cameraShutter');
+            const blob = await captureSelfieBlob();
+            const filename = SelfieService.generateFilename(currentGarment?.name, selectedGender);
+            await SelfieService.copyToClipboard(blob);
+            await SelfieService.saveToDevice(blob, filename);
+            dispatch({ type: ACTIONS.SET_VIEW_STATE, payload: { selfieCountdown: 'Saved!' } });
+        } catch (error) {
+            console.error('Selfie gesture failed:', error);
+            dispatch({ type: ACTIONS.SET_VIEW_STATE, payload: { selfieCountdown: 'Failed!' } });
+        } finally {
+            setTimeout(() => dispatch({ type: ACTIONS.SET_VIEW_STATE, payload: { selfieCountdown: null } }), 1000);
+        }
+    };
+
+    const handleGestureAction = (gesture) => {
+        switch (gesture.type) {
+            case 'pointing_left':
+                handleGarmentChangeByGesture('prev');
+                break;
+            case 'pointing_right':
+                handleGarmentChangeByGesture('next');
+                break;
+            case 'clap':
+                handleCategoryChangeByGesture('next');
+                break;
+            case 'peace_sign':
+                handleSelfieGesture();
+                break;
+            case 'arms_crossed':
+                handleGenderChange(selectedGender === 'male' ? 'female' : 'male');
+                break;
+            default:
+                break;
+        }
+    };
+
+    useEffect(() => {
+        if (!gestureEnabled || detectionPaused || isSwitchingGender) {
+            setPendingGesture(null);
+            return;
+        }
+        const confirmed = gestureDetector.update({ poseLandmarks, leftHandLandmarks, rightHandLandmarks });
+        setPendingGesture(gestureDetector.pending);
+        if (confirmed) {
+            handleGestureAction(confirmed);
+            setActiveGesture(confirmed.type);
+            setTimeout(() => setActiveGesture(null), 600);
+        }
+    }, [poseLandmarks, leftHandLandmarks, rightHandLandmarks, gestureEnabled, detectionPaused, isSwitchingGender]);
 
     useEffect(() => {
         if (!mountRef.current) return;
@@ -390,7 +515,8 @@ const MobileView = React.forwardRef((props, ref) => {
             canvas.style.objectFit = 'cover';
 
             try {
-                const holistic = await cameraManager.initialiseGlobalHolistic();
+                dispatch({ type: ACTIONS.SET_VIEW_STATE, payload: { cameraError: null } });
+                const holistic = await initialiseGlobalHolistic(true);
                 if (!holistic) throw new Error('Holistic instance is null');
 
                 holistic.onResults((results) => {
@@ -434,6 +560,15 @@ const MobileView = React.forwardRef((props, ref) => {
 
             } catch (error) {
                 console.error("Failed to initialise MediaPipe:", error);
+                let message = 'We could not start the virtual try-on. Please refresh and try again.';
+                if (error && (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError')) {
+                    message = 'Camera access was blocked. Please allow camera permission and refresh.';
+                } else if (error && (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError')) {
+                    message = 'No camera was found on this device.';
+                } else if (error && (error.name === 'NotReadableError' || error.name === 'TrackStartError')) {
+                    message = 'Your camera is in use by another app. Close it and refresh.';
+                }
+                dispatch({ type: ACTIONS.SET_VIEW_STATE, payload: { cameraError: message } });
             }
         };
 
@@ -445,46 +580,7 @@ const MobileView = React.forwardRef((props, ref) => {
     }, [selectedGender, isSwitchingGender, selectedBackground, mobileDimensions, dispatch]);
 
     React.useImperativeHandle(ref, () => ({
-        takeSelfie: async () => {
-            const backgroundCanvas = canvasElement.current;
-            const threeCanvas = rendererRef.current?.domElement;
-
-            if (!backgroundCanvas || !threeCanvas) {
-                throw new Error("Selfie failed: Missing canvas elements");
-            }
-
-            const compositeCanvas = document.createElement('canvas');
-            const scale = 2;
-            compositeCanvas.width = mobileDimensions.width * scale;
-            compositeCanvas.height = mobileDimensions.height * scale;
-            const compositeCtx = compositeCanvas.getContext('2d');
-
-            compositeCtx.imageSmoothingEnabled = true;
-            compositeCtx.imageSmoothingQuality = 'high';
-
-            compositeCtx.save();
-            compositeCtx.scale(-1, 1);
-            compositeCtx.translate(-compositeCanvas.width, 0);
-            compositeCtx.drawImage(backgroundCanvas, 0, 0, compositeCanvas.width, compositeCanvas.height);
-            compositeCtx.restore();
-
-            compositeCtx.drawImage(threeCanvas, 0, 0, compositeCanvas.width, compositeCanvas.height);
-
-            compositeCtx.font = `${12 * scale}px SF Pro Display`;
-            compositeCtx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-            compositeCtx.textAlign = 'right';
-            compositeCtx.fillText('softWEAR', compositeCanvas.width - (10 * scale), compositeCanvas.height - (10 * scale));
-
-            return new Promise((resolve, reject) => {
-                compositeCanvas.toBlob((blob) => {
-                    if (blob) {
-                        resolve(blob);
-                    } else {
-                        reject(new Error('Failed to create image blob'));
-                    }
-                }, 'image/png', 0.95);
-            });
-        }
+        takeSelfie: () => captureSelfieBlob()
     }));
 
     if (!isMobileLayout || !deviceInfo.isPortrait) {
@@ -537,28 +633,62 @@ const MobileView = React.forwardRef((props, ref) => {
                 </div>
             )}
 
-            {!holisticInitialised && (
-                <div className="loading-overlay">
-                    <div className="loading-spinner"></div>
-                    <div className="loading-text">Initialising AI Body Detection...</div>
+            {cameraError ? (
+                <div className="loading-overlay camera-error-overlay" role="alert">
+                    <div className="camera-error-icon" aria-hidden="true">⚠</div>
+                    <div className="camera-error-text">{cameraError}</div>
+                    <button
+                        type="button"
+                        className="camera-error-retry"
+                        onClick={() => window.location.reload()}
+                    >
+                        Retry
+                    </button>
+                </div>
+            ) : !holisticInitialised && (
+                <div className="loading-overlay" role="status" aria-live="polite">
+                    <div className="loading-spinner" aria-hidden="true"></div>
+                    <div className="loading-text">Initialising AI Body Detection…</div>
                 </div>
             )}
 
+            {gestureEnabled && activeGesture && (
+                <GestureIndicator activeGesture={activeGesture} selectedGender={selectedGender} />
+            )}
+            {gestureEnabled && <GestureFeedback pending={pendingGesture} />}
+
+            <button
+                type="button"
+                onClick={() => dispatch({ type: ACTIONS.SET_VIEW_STATE, payload: { gestureEnabled: !gestureEnabled } })}
+                className={`mobile-gesture-toggle ${gestureEnabled ? 'active' : ''}`}
+                aria-label={gestureEnabled ? 'Turn off gesture control' : 'Turn on gesture control'}
+                aria-pressed={gestureEnabled}
+                title="Gesture control"
+            >
+                <span aria-hidden="true">👋</span>
+            </button>
+
             <div className="mobile-controls-overlay">
-                <div className="mobile-top-bar">
+                <div className="mobile-top-bar" role="group" aria-label="Model type">
                     <button
+                        type="button"
                         onClick={() => handleGenderChange('male')}
                         className={`gender-btn-mobile ${selectedGender === 'male' ? 'active' : ''}`}
                         disabled={isSwitchingGender}
+                        aria-label="Men's Collection"
+                        aria-pressed={selectedGender === 'male'}
                     >
-                        ♂
+                        <span aria-hidden="true">♂</span>
                     </button>
                     <button
+                        type="button"
                         onClick={() => handleGenderChange('female')}
                         className={`gender-btn-mobile ${selectedGender === 'female' ? 'active' : ''}`}
                         disabled={isSwitchingGender}
+                        aria-label="Women's Collection"
+                        aria-pressed={selectedGender === 'female'}
                     >
-                        ♀
+                        <span aria-hidden="true">♀</span>
                     </button>
                 </div>
 
@@ -575,13 +705,15 @@ const MobileView = React.forwardRef((props, ref) => {
 
                 <div className="mobile-bottom-actions">
                     <button
+                        type="button"
                         onClick={handleBackgroundCycle}
                         className="background-cycle-btn"
+                        aria-pressed={!!selectedBackground}
                     >
                         {selectedBackground ? `Wardrobe ${selectedBackground.slice(-1)}` : 'Wardrobe Off'}
                     </button>
                     <SelfieButton
-                        vtoCanvasRef={{ current: { takeSelfie: ref?.current?.takeSelfie } }}
+                        vtoCanvasRef={{ current: { takeSelfie: captureSelfieBlob } }}
                         garmentName={currentGarment?.name}
                         selectedGender={selectedGender}
                         disabled={!selectedGarment}

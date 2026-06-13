@@ -85,6 +85,45 @@
     letter-spacing: -0.01em;
 }
 
+.camera-error-overlay {
+    background-color: rgba(0, 0, 0, 0.85);
+    padding: 24px;
+    text-align: center;
+}
+
+.camera-error-icon {
+    font-size: 40px;
+    color: var(--warning);
+    margin-bottom: 12px;
+    line-height: 1;
+}
+
+.camera-error-text {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 590;
+    max-width: 32ch;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.camera-error-retry {
+    background: var(--primary);
+    color: var(--on-primary);
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 12px 28px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 44px;
+    transition: var(--transition);
+}
+
+.camera-error-retry:hover {
+    background: var(--primary-dark);
+}
+
 .debug-panel {
     position: absolute;
     top: 10px;

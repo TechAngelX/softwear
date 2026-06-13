@@ -32,8 +32,10 @@ const ControlPanel = ({ vtoCanvasRef, onBackgroundChange }) => {
 
             <div className="controls-grid">
                 <button
+                    type="button"
                     onClick={onBackgroundChange}
                     className={`btn-control ${selectedBackground ? 'active' : ''}`}
+                    aria-pressed={!!selectedBackground}
                 >
                     {selectedBackground ? `Wardrobe ${selectedBackground.slice(-1)}` : 'Wardrobe Off'}
                 </button>
@@ -50,18 +52,23 @@ const ControlPanel = ({ vtoCanvasRef, onBackgroundChange }) => {
             </h3>
             <div className="controls-grid">
                 <button
+                    type="button"
                     onClick={handleToggleGarment}
                     className={`btn-control ${showGarment ? 'active' : ''}`}
+                    aria-pressed={showGarment}
                 >
                     {showGarment ? 'Hide Garment [G]' : 'Show Garment [G]'}
                 </button>
                 <button
+                    type="button"
                     onClick={handleToggleLandmarks}
                     className={`btn-control ${showLandmarks ? 'active' : ''}`}
+                    aria-pressed={showLandmarks}
                 >
                     {showLandmarks ? 'Hide Landmarks [L]' : 'Show Landmarks [L]'}
                 </button>
                 <button
+                    type="button"
                     onClick={handleToggleTheme}
                     className="btn-control"
                     aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}

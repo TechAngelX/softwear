@@ -46,6 +46,7 @@ export const initialState = {
         detectionPaused: false,
         showDebug: false,
         selfieCountdown: null,
+        cameraError: null,
     },
     data: {
         garmentMenu: null,

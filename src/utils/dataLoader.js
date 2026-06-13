@@ -64,7 +64,7 @@ export const loadBoneData = async () => {
     }
 
     try {
-        const response = await fetch('./data/smplx_M_bone_data.json');
+        const response = await fetch('./data/smplx_bone_data.json');
         if (!response.ok) {
             throw new Error(`Failed to load bone data: ${response.status}`);
         }

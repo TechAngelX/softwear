@@ -27,8 +27,6 @@ export class VtoPoseEngine {
         // Grace period: ~0.5s at 30fps before hiding garment
         this.lostFrameThreshold = 15;
 
-        console.log('VtoPoseEngine: Initialized for mobile:', this.isMobile);
-
         const filterConfig = {
             freq: 30,
             mincutoff: this.isMobile ? 0.1 : 1.0,
@@ -58,17 +56,6 @@ export class VtoPoseEngine {
         this.updateCount++;
         this.currentLandmarks = landmarks;
 
-        if (this.updateCount % 30 === 0) {
-            console.log('VtoPoseEngine: Update called', {
-                updateCount: this.updateCount,
-                hasLandmarks: !!landmarks,
-                landmarkCount: landmarks?.length || 0,
-                hasModel: !!garmentModel,
-                hasCamera: !!camera,
-                modelVisible: garmentModel?.visible
-            });
-        }
-
         if (!landmarks || !garmentModel || !camera) {
             if(garmentModel) garmentModel.visible = false;
             return;
@@ -78,15 +65,6 @@ export class VtoPoseEngine {
         const rightShoulder = landmarks[LANDMARKS.RIGHT_SHOULDER];
         const leftHip = landmarks[LANDMARKS.LEFT_HIP];
         const rightHip = landmarks[LANDMARKS.RIGHT_HIP];
-
-        if (this.updateCount % 30 === 0) {
-            console.log('VtoPoseEngine: Key landmarks', {
-                leftShoulder: leftShoulder ? {x: leftShoulder.x.toFixed(3), y: leftShoulder.y.toFixed(3), vis: leftShoulder.visibility.toFixed(3)} : null,
-                rightShoulder: rightShoulder ? {x: rightShoulder.x.toFixed(3), y: rightShoulder.y.toFixed(3), vis: rightShoulder.visibility.toFixed(3)} : null,
-                leftHip: leftHip ? {x: leftHip.x.toFixed(3), y: leftHip.y.toFixed(3), vis: leftHip.visibility.toFixed(3)} : null,
-                rightHip: rightHip ? {x: rightHip.x.toFixed(3), y: rightHip.y.toFixed(3), vis: rightHip.visibility.toFixed(3)} : null
-            });
-        }
 
         const visibilityThreshold = this.isMobile ? 0.1 : 0.5;
 
@@ -122,10 +100,6 @@ export class VtoPoseEngine {
                 visibility: 0.3
             };
             hasUsableLandmarks = true;
-
-            if (this.updateCount % 30 === 0) {
-                console.log('VtoPoseEngine: Using estimated hip positions from shoulder width');
-            }
         }
 
         if (!hasUsableLandmarks) {
@@ -142,9 +116,6 @@ export class VtoPoseEngine {
             if (this.lostFrameCount > this.lostFrameThreshold) {
                 garmentModel.visible = false;
                 this.trackingLost = true;
-                if (this.updateCount % 30 === 0) {
-                    console.log('VtoPoseEngine: Tracking lost - hiding garment');
-                }
             }
             return;
         }
@@ -187,15 +158,6 @@ export class VtoPoseEngine {
         garmentModel.position.copy(this.currentPosition);
         garmentModel.scale.copy(this.currentScale);
         garmentModel.quaternion.copy(this.currentRotation);
-
-        if (this.updateCount % 30 === 0) {
-            console.log('VtoPoseEngine: Garment updated', {
-                position: {x: garmentModel.position.x.toFixed(3), y: garmentModel.position.y.toFixed(3), z: garmentModel.position.z.toFixed(3)},
-                scale: garmentModel.scale.x.toFixed(3),
-                visible: garmentModel.visible,
-                torsoHeight: torsoHeight.toFixed(3)
-            });
-        }
     }
 
     _projectToWorld(vector, camera) {

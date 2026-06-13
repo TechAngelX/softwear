@@ -44,11 +44,13 @@ const GenderSelector = ({ onSelectGender }) => {
 
             <div className="gender-options">
                 <button
+                    type="button"
                     className="gender-option male-option"
                     onClick={() => handleGenderSelect('male')}
+                    aria-label="Choose Men's Collection"
                 >
                     <div className="gender-card">
-                        <div className="gender-icon-wrapper">
+                        <div className="gender-icon-wrapper" aria-hidden="true">
                             <div className="gender-icon male-icon">♂</div>
                             <div className="icon-glow male-glow"></div>
                         </div>
@@ -70,11 +72,13 @@ const GenderSelector = ({ onSelectGender }) => {
                 </button>
 
                 <button
+                    type="button"
                     className="gender-option female-option"
                     onClick={() => handleGenderSelect('female')}
+                    aria-label="Choose Women's Collection"
                 >
                     <div className="gender-card">
-                        <div className="gender-icon-wrapper">
+                        <div className="gender-icon-wrapper" aria-hidden="true">
                             <div className="gender-icon female-icon">♀</div>
                             <div className="icon-glow female-glow"></div>
                         </div>

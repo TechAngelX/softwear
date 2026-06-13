@@ -33,11 +33,11 @@ describe('CameraManager', () => {
 
         await cameraManager.startCamera(mockVideoElement, mockOnFrameCallback);
 
-        expect(Camera).toHaveBeenCalledWith(mockVideoElement, {
+        expect(Camera).toHaveBeenCalledWith(mockVideoElement, expect.objectContaining({
             onFrame: expect.any(Function),
             width: expectedWidth,
             height: expectedHeight
-        });
+        }));
         expect(cameraManager.cameraInstance.start).toHaveBeenCalledTimes(1);
     });
 

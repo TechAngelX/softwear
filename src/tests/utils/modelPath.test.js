@@ -26,7 +26,7 @@ describe('Model Path Resolution', () => {
         const garment = { modelPath: './public/3dmodels/men/jackets/puffer/puffer.glb' };
         // The second argument `forceMobile` is a boolean.
         const path = resolveModelPath(garment, true);
-        expect(path).toBe('./public/3dmodels/men/jackets/puffer/puffer_mlb.glb');
+        expect(path).toBe('./public/3dmodels/men/jackets/puffer/puffer_mob.glb');
     });
 
     test('handles unknown garments with fallback', () => {

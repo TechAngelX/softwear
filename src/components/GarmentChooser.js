@@ -41,9 +41,9 @@ const GarmentChooser = ({ garments, selectedGarment, confirmedGarment, onSelectG
         return (
             <div className="on-screen-garment-chooser">
                 <div className={`garment-category-nav ${isConfirmed && confirmedCategoryIndex === activeCategory ? 'confirmed' : ''}`}>
-                    <button onClick={handlePrev} className="category-arrow-btn">‹</button>
+                    <button type="button" onClick={handlePrev} className="category-arrow-btn" aria-label="Previous category">‹</button>
                     <span className="category-name-display">{currentCategory}</span>
-                    <button onClick={handleNext} className="category-arrow-btn">›</button>
+                    <button type="button" onClick={handleNext} className="category-arrow-btn" aria-label="Next category">›</button>
                 </div>
                 <div className="garment-items-container">
                     {garments[activeCategory] && garments[activeCategory].items.map((garment) => {
@@ -55,14 +55,17 @@ const GarmentChooser = ({ garments, selectedGarment, confirmedGarment, onSelectG
 
                         return (
                             <button
+                                type="button"
                                 key={garment.id}
                                 onClick={() => onSelectGarment(garment.id)}
                                 className={buttonClass}
                                 title={garment.name}
+                                aria-label={`Try on ${garment.name}`}
+                                aria-pressed={isSelected}
                             >
                                 <img
                                     src={resolveImagePath(garment.id)}
-                                    alt={garment.name}
+                                    alt=""
                                     onError={handleImageError}
                                 />
                             </button>
@@ -78,9 +81,11 @@ const GarmentChooser = ({ garments, selectedGarment, confirmedGarment, onSelectG
             <div className="category-pills">
                 {garments.map((category, index) => (
                     <button
+                        type="button"
                         key={index}
                         onClick={() => onCategoryChange(index)}
                         className={`category-pill ${activeCategory === index ? 'active' : ''}`}
+                        aria-pressed={activeCategory === index}
                     >
                         {category.category}
                     </button>
@@ -89,10 +94,12 @@ const GarmentChooser = ({ garments, selectedGarment, confirmedGarment, onSelectG
             <div className="garment-items-container">
                 {garments[activeCategory] && garments[activeCategory].items.map((garment) => (
                     <button
+                        type="button"
                         key={garment.id}
                         onClick={() => onSelectGarment(garment.id)}
                         className={`sidebar-garment-btn ${selectedGarment === garment.id ? 'active' : ''}`}
                         title={garment.name}
+                        aria-pressed={selectedGarment === garment.id}
                     >
                         {garment.name}
                     </button>

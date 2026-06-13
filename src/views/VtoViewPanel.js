@@ -68,6 +68,7 @@ import { loadItemData } from '../utils/dataLoader';
 import { resolveModelPath } from '../utils/modelPath';
 import VtoCanvas from '../components/VtoCanvas';
 import GestureIndicator from '../gestures/GestureIndicator';
+import GestureFeedback from '../gestures/GestureFeedback';
 import { GestureDetector } from '../gestures/GestureDetector';
 import { useStateManager, ACTIONS } from '../stateManager';
 import { useDeviceDetection } from '../utils/DeviceDetectionContext';
@@ -96,7 +97,8 @@ const VtoViewPanel = forwardRef(({
                                      isAccessoryCategory,
                                      onGestureAction,
                                      onDetectionToggle,
-                                     selectedBackground
+                                     selectedBackground,
+                                     cameraError
                                  }, ref) => {
     const { deviceInfo } = useDeviceDetection();
     const { state, dispatch } = useStateManager();
@@ -104,6 +106,7 @@ const VtoViewPanel = forwardRef(({
     const [garmentData, setGarmentData] = useState(null);
     const [showClapEffect, setShowClapEffect] = useState(false);
     const [activeGesture, setActiveGesture] = useState(null);
+    const [pendingGesture, setPendingGesture] = useState(null);
     const [gestureDetector] = useState(() => new GestureDetector());
     const [performanceMetrics, setPerformanceMetrics] = useState({ landmarkRate: 0, renderFPS: 0 });
     const [meshInfo, setMeshInfo] = useState({ vertices: 0, fileSize: 0 });
@@ -121,16 +124,8 @@ const VtoViewPanel = forwardRef(({
     }, []);
 
     useEffect(() => {
-        console.log('Gesture detection check:', {
-            gestureEnabled,
-            hasLandmarks: !!landmarks,
-            detectionPaused,
-            poseLandmarks: landmarks?.poseLandmarks?.length || 0,
-            leftHandLandmarks: landmarks?.leftHandLandmarks?.length || 0,
-            rightHandLandmarks: landmarks?.rightHandLandmarks?.length || 0
-        });
-
         if (!gestureEnabled || !landmarks || detectionPaused) {
+            setPendingGesture(null);
             return;
         }
 
@@ -141,8 +136,8 @@ const VtoViewPanel = forwardRef(({
         };
 
         const confirmedGesture = gestureDetector.update(completeLandmarks);
+        setPendingGesture(gestureDetector.pending);
         if (confirmedGesture) {
-            console.log('Gesture detected:', confirmedGesture);
             onGestureAction(confirmedGesture);
             setActiveGesture(confirmedGesture.type);
             setTimeout(() => {
@@ -293,11 +288,24 @@ const VtoViewPanel = forwardRef(({
                 )}
 
                 {showIndicator && (<div className="model-view-indicator">{indicatorText}</div>)}
+                {gestureEnabled && !detectionPaused && <GestureFeedback pending={pendingGesture} />}
                 <div className="on-screen-controls">{children}</div>
-                {!holisticInitialised && (
-                    <div className="loading-overlay">
-                        <div className="loading-spinner"></div>
-                        <div className="loading-text">Initialising AI Body Detection...</div>
+                {cameraError ? (
+                    <div className="loading-overlay camera-error-overlay" role="alert">
+                        <div className="camera-error-icon" aria-hidden="true">⚠</div>
+                        <div className="camera-error-text">{cameraError}</div>
+                        <button
+                            type="button"
+                            className="camera-error-retry"
+                            onClick={() => window.location.reload()}
+                        >
+                            Retry
+                        </button>
+                    </div>
+                ) : !holisticInitialised && (
+                    <div className="loading-overlay" role="status" aria-live="polite">
+                        <div className="loading-spinner" aria-hidden="true"></div>
+                        <div className="loading-text">Initialising AI Body Detection…</div>
                     </div>
                 )}
 
@@ -373,12 +381,12 @@ const VtoViewPanel = forwardRef(({
                             </div>
 
                             <div>
-                                <div style={{ fontSize: '10px', color: 'rgb(0,255,255)', marginBottom: '2px' }}>Gestures:</div>
-                                <div style={{ fontSize: '10px', color: '#ccc' }}>Point Right - Next Garment</div>
-                                <div style={{ fontSize: '10px', color: '#ccc' }}>Point Left - Previous Garment</div>
+                                <div style={{ fontSize: '10px', color: 'rgb(0,255,255)', marginBottom: '2px' }}>Gestures (hold ~0.5s):</div>
+                                <div style={{ fontSize: '10px', color: '#ccc' }}>Arm out right - Next Garment</div>
+                                <div style={{ fontSize: '10px', color: '#ccc' }}>Arm out left - Previous Garment</div>
                                 <div style={{ fontSize: '10px', color: '#ccc' }}>Peace Sign - Take Selfie</div>
                                 <div style={{ fontSize: '10px', color: '#ccc' }}>Arms Crossed - Change Gender</div>
-                                <div style={{ fontSize: '10px', color: '#ccc' }}>Clap - Change Category</div>
+                                <div style={{ fontSize: '10px', color: '#ccc' }}>Hands Together - Change Category</div>
                             </div>
                         </div>
                     </div>

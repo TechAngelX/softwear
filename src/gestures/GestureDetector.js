@@ -30,98 +30,192 @@ class GestureDetector {
             cooldown: 5000,
             lastTriggerTime: 0
         };
+
+        // Authoritative gesture recogniser.
+        // - Held gestures (pointing / arms-crossed / peace) must be sustained for
+        //   holdMs before firing once — kills accidental flicks.
+        // - Edge gestures (clap) fire the instant the pose appears, because a clap
+        //   is momentary; requiring a hold would miss it.
+        this.hold = { type: null, startTime: 0, frames: 0, fired: false };
+        this.holdMs = 300;
+        this.minHoldFrames = 3;
+        this.globalCooldownMs = 900;
+        this.lastFireTime = 0;
+        this.edgeGestures = new Set(['clap']);
+
+        // Arming state for UI feedback (#8): what gesture is being held and how
+        // close it is to firing (0..1). Read by the view after each update().
+        this.pending = null;
     }
 
     update(landmarks) {
         if (!landmarks?.poseLandmarks) {
             this.addToHistory(null);
             this.resetStates();
+            this.hold = { type: null, startTime: 0, frames: 0, fired: false };
+            this.pending = null;
             return null;
         }
 
-        const currentTime = Date.now();
-        const gestureData = this.extractGestureFeatures(landmarks);
-        this.addToHistory(gestureData);
-        let gestureResult = null;
+        const now = Date.now();
+        this.addToHistory(this.extractGestureFeatures(landmarks));
 
-        this.processClapGesture();
-        if (this.clapState.hasTriggered) {
-            if (currentTime - this.clapState.lastTriggerTime > this.clapState.cooldown) {
-                this.clapState.lastTriggerTime = currentTime;
-                gestureResult = { type: 'clap', confidence: 0.95 };
+        const candidate = this.detectCandidate(landmarks);
+        const cooledDown = (now - this.lastFireTime) >= this.globalCooldownMs;
+        let fired = null;
+
+        if (candidate !== this.hold.type) {
+            // New candidate this frame. Edge gestures (clap) fire immediately.
+            this.hold = { type: candidate, startTime: now, frames: candidate ? 1 : 0, fired: false };
+            if (candidate && this.edgeGestures.has(candidate) && cooledDown) {
+                fired = this._fire(candidate, now);
             }
-            this.clapState.hasTriggered = false;
-        }
-
-        const armsCrossedResult = this.detectArmsCrossed();
-        if (armsCrossedResult && !gestureResult) {
-            if (currentTime - this.armsCrossedState.lastTriggerTime > this.armsCrossedState.cooldown) {
-                this.armsCrossedState.lastTriggerTime = currentTime;
-                gestureResult = armsCrossedResult;
-            }
-        }
-
-        const peaceSignResult = this.detectPeaceSign();
-        if (peaceSignResult && !gestureResult) {
-            if (currentTime - this.peaceSignState.lastTriggerTime > this.peaceSignState.cooldown) {
-                this.peaceSignState.lastTriggerTime = currentTime;
-                gestureResult = peaceSignResult;
+        } else if (candidate) {
+            // Same candidate continuing — held (level) gestures arm over holdMs.
+            this.hold.frames++;
+            if (!this.hold.fired && !this.edgeGestures.has(candidate)) {
+                const heldLongEnough = (now - this.hold.startTime) >= this.holdMs && this.hold.frames >= this.minHoldFrames;
+                if (heldLongEnough && cooledDown) {
+                    fired = this._fire(candidate, now);
+                }
             }
         }
 
-        if (!gestureResult) {
-            const simplePointingResult = this.detectSimplePointing();
-            if (simplePointingResult) {
-                gestureResult = simplePointingResult;
-            }
-        }
-
-        if (gestureResult) {
-            if (gestureResult.type !== this.lastGestureType || currentTime - this.lastGestureTime > this.cooldownPeriod) {
-                this.lastGestureTime = currentTime;
-                this.lastGestureType = gestureResult.type;
-                return gestureResult;
-            }
+        // Publish arming progress for on-screen feedback (held gestures only).
+        if (candidate && !this.edgeGestures.has(candidate) && !this.hold.fired) {
+            this.pending = { type: candidate, progress: Math.min(1, (now - this.hold.startTime) / this.holdMs) };
         } else {
-            this.lastGestureType = null;
+            this.pending = null;
+        }
+
+        return fired;
+    }
+
+    _fire(type, now) {
+        this.hold.fired = true;
+        this.lastFireTime = now;
+        this.lastGestureTime = now;
+        this.lastGestureType = type;
+        this.pending = null;
+        return { type, confidence: 0.95 };
+    }
+
+    /**
+     * Resolves the single, unambiguous gesture the body is making this frame.
+     * Pose-skeleton driven (robust) with priority ordering so similar poses
+     * (crossed arms vs. hands together) never conflict.
+     */
+    detectCandidate(landmarks) {
+        const poseGesture = this.detectPoseGesture(landmarks.poseLandmarks);
+        if (poseGesture) return poseGesture;
+        if (this.isPeaceSignFrame(landmarks)) return 'peace_sign';
+        return null;
+    }
+
+    detectPoseGesture(pose) {
+        if (!pose) return null;
+
+        const Lsh = pose[11], Rsh = pose[12];
+        const Lel = pose[13], Rel = pose[14];
+        const Lw = pose[15], Rw = pose[16];
+        const Lhip = pose[23], Rhip = pose[24];
+        if (!Lsh || !Rsh || !Lw || !Rw) return null;
+
+        // Require the key joints to be confidently tracked.
+        if ([Lsh, Rsh, Lw, Rw].some(p => (p.visibility ?? 1) < 0.5)) return null;
+
+        // Everything is scaled by shoulder width so it is distance-invariant.
+        const sw = Math.hypot(Lsh.x - Rsh.x, Lsh.y - Rsh.y);
+        if (sw < 0.05) return null; // person too small / not facing camera — unreliable
+
+        const shoulderY = (Lsh.y + Rsh.y) / 2;
+        const midShoulderX = (Lsh.x + Rsh.x) / 2;
+        const hipY = (Lhip && Rhip) ? (Lhip.y + Rhip.y) / 2 : shoulderY + sw * 1.5;
+        const wristGap = Math.hypot(Lw.x - Rw.x, Lw.y - Rw.y);
+
+        // 1) Arms crossed — each wrist near the OPPOSITE shoulder, high on the torso.
+        const lwToRsh = Math.hypot(Lw.x - Rsh.x, Lw.y - Rsh.y);
+        const rwToLsh = Math.hypot(Rw.x - Lsh.x, Rw.y - Lsh.y);
+        const handsHigh = Lw.y < shoulderY + 0.45 * sw && Rw.y < shoulderY + 0.45 * sw;
+        if (lwToRsh < 0.6 * sw && rwToLsh < 0.6 * sw && handsHigh && wristGap < 0.8 * sw) {
+            return 'arms_crossed';
+        }
+
+        // 2) Hands together (clap) — wrists meet near the centre line, anywhere
+        //    from just above the shoulders down to the hips. Edge-triggered.
+        const centred = Math.abs((Lw.x + Rw.x) / 2 - midShoulderX) < 0.6 * sw;
+        const inTorsoBand = Lw.y > shoulderY - 0.2 * sw && Rw.y > shoulderY - 0.2 * sw && Lw.y < hipY && Rw.y < hipY;
+        if (wristGap < 0.5 * sw && centred && inTorsoBand) {
+            return 'clap';
+        }
+
+        // 3) Pointing — a natural reach to one side at ANY comfortable height.
+        //    The arm must be extended outward: the wrist is clearly outside the
+        //    shoulder AND past the elbow (so a resting/hanging arm never counts).
+        //    Image x is mirrored on screen, so a wrist reaching toward image-left
+        //    reads to the user as "pointing right".
+        const REACH = 0.25 * sw;       // wrist this far outside the shoulder
+        const elbowMargin = 0.05 * sw; // and clearly beyond the elbow
+        const relReliable = (Rel?.visibility ?? 1) >= 0.5;
+        const lelReliable = (Lel?.visibility ?? 1) >= 0.5;
+
+        const rightReach = (Rsh.x - Rw.x) > REACH && (!relReliable || Rw.x < Rel.x - elbowMargin);
+        const leftReach = (Lw.x - Lsh.x) > REACH && (!lelReliable || Lw.x > Lel.x + elbowMargin);
+
+        if (rightReach && !leftReach) return 'pointing_right';
+        if (leftReach && !rightReach) return 'pointing_left';
+        if (rightReach && leftReach) {
+            // Both arms out — go with whichever is reaching further.
+            return (Rsh.x - Rw.x) >= (Lw.x - Lsh.x) ? 'pointing_right' : 'pointing_left';
         }
 
         return null;
     }
 
+    isPeaceSignFrame(landmarks) {
+        for (const hand of [landmarks.leftHandLandmarks, landmarks.rightHandLandmarks]) {
+            const h = this.analyseHand(hand);
+            if (h.valid && h.fingersExtended.index && h.fingersExtended.middle &&
+                !h.fingersExtended.ring && !h.fingersExtended.pinky) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     processClapGesture() {
-        const recentHandData = this.history.slice(-5);
-        const handDistances = recentHandData.map(frame => {
-            if (frame && frame.hands.left.valid && frame.hands.right.valid) {
-                return {
-                    distance: this.distance3D(frame.hands.left.wrist, frame.hands.right.wrist),
-                    leftY: frame.hands.left.wrist.y,
-                    rightY: frame.hands.right.wrist.y
-                };
-            }
-            return null;
-        });
+        // Use POSE wrists (landmarks 15/16) rather than hand landmarks: when the
+        // hands meet they occlude each other and MediaPipe routinely drops one
+        // hand, so hand-landmark based clap detection almost never fires. Pose
+        // wrists stay tracked through the whole motion.
+        const recentFrames = this.history.slice(-6);
+        const samples = recentFrames.map(frame => {
+            const lw = frame?.pose?.leftWrist;
+            const rw = frame?.pose?.rightWrist;
+            if (!lw || !rw) return null;
+            if ((lw.visibility ?? 1) < 0.4 || (rw.visibility ?? 1) < 0.4) return null;
+            // 2D distance — z from pose is too noisy to be useful here
+            return {
+                distance: Math.hypot(lw.x - rw.x, lw.y - rw.y),
+                heightDiff: Math.abs(lw.y - rw.y)
+            };
+        }).filter(Boolean);
 
-        const validDistances = handDistances.filter(d => d !== null);
+        if (samples.length < 3) return;
 
-        if (validDistances.length >= 3) {
-            const current = validDistances[validDistances.length - 1];
-            const prev = validDistances[validDistances.length - 2];
-            const prevPrev = validDistances[validDistances.length - 3];
+        const current = samples[samples.length - 1];
+        const prev = samples[samples.length - 2];
+        const prevPrev = samples[samples.length - 3];
 
-            // Check hands were apart, then came together rapidly
-            const wasApart = prevPrev.distance > 0.2;
-            const cameTogetherRapidly = current.distance < prev.distance * 0.75;
-            const areClose = current.distance < 0.15;
+        // Hands were clearly apart, then came together quickly, and ended close
+        // and roughly level — distinguishes a clap from resting clasped hands.
+        const wasApart = Math.max(prev.distance, prevPrev.distance) > 0.22;
+        const cameTogetherRapidly = current.distance < prev.distance * 0.82;
+        const areClose = current.distance < 0.18;
+        const handsAtSimilarHeight = current.heightDiff < 0.2;
 
-            // Check hands are at similar height (not too far apart vertically)
-            const handsAtSimilarHeight = Math.abs(current.leftY - current.rightY) < 0.2;
-
-            const isClapMotion = wasApart && cameTogetherRapidly && areClose && handsAtSimilarHeight;
-
-            if (isClapMotion) {
-                this.clapState.hasTriggered = true;
-            }
+        if (wasApart && cameTogetherRapidly && areClose && handsAtSimilarHeight) {
+            this.clapState.hasTriggered = true;
         }
     }
 
@@ -281,35 +375,33 @@ class GestureDetector {
         const framesWithLeftHand = recentFrames.filter(f => f?.hands.left.valid);
         const framesWithRightHand = recentFrames.filter(f => f?.hands.right.valid);
 
-        // Require 3+ frames for detection
+        // A hand only spans ~10% of the image width, so the fingertip->wrist
+        // horizontal offset when pointing sideways is small. 0.15 was unreachable;
+        // ~0.05 reliably catches a deliberate sideways point. Image x is mirrored
+        // on screen, so a fingertip to the image-left reads as "pointing right".
+        const DIRECTION_THRESHOLD = 0.05;
+        const ELEVATION = 0.7; // wrist above this (lower y = higher) counts as raised
+
         if (framesWithLeftHand.length >= 3) {
             const avgDirection = framesWithLeftHand.reduce((sum, frame) => sum + frame.hands.left.direction.x, 0) / framesWithLeftHand.length;
+            const isHighUp = framesWithLeftHand.some(f => f.hands.left.wrist.y < ELEVATION);
 
-            // Check hand is elevated (above waist level)
-            const isHighUp = framesWithLeftHand.some(f => f.hands.left.wrist.y < 0.6);
-
-            // Threshold of 0.15 for better detection
-            if (isHighUp && avgDirection < -0.15) {
+            if (isHighUp && avgDirection < -DIRECTION_THRESHOLD) {
                 return { type: 'pointing_right', confidence: 0.8, hand: 'left' };
             }
-
-            if (isHighUp && avgDirection > 0.15) {
+            if (isHighUp && avgDirection > DIRECTION_THRESHOLD) {
                 return { type: 'pointing_left', confidence: 0.8, hand: 'left' };
             }
         }
 
         if (framesWithRightHand.length >= 3) {
             const avgDirection = framesWithRightHand.reduce((sum, frame) => sum + frame.hands.right.direction.x, 0) / framesWithRightHand.length;
+            const isHighUp = framesWithRightHand.some(f => f.hands.right.wrist.y < ELEVATION);
 
-            // Check hand is elevated (above waist level)
-            const isHighUp = framesWithRightHand.some(f => f.hands.right.wrist.y < 0.6);
-
-            // Threshold of 0.15 for better detection
-            if (isHighUp && avgDirection < -0.15) {
+            if (isHighUp && avgDirection < -DIRECTION_THRESHOLD) {
                 return { type: 'pointing_right', confidence: 0.8, hand: 'right' };
             }
-
-            if (isHighUp && avgDirection > 0.15) {
+            if (isHighUp && avgDirection > DIRECTION_THRESHOLD) {
                 return { type: 'pointing_left', confidence: 0.8, hand: 'right' };
             }
         }

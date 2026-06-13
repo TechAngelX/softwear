@@ -72,7 +72,6 @@ export class GarmentEffectManager {
      */
     showGarment(garmentModel, onComplete = null) {
         if (!garmentModel) return;
-        console.log('EFFECT: Showing garment with', this.config.appearEffect);
 
         this.stopAnimation(garmentModel);
 
@@ -105,7 +104,6 @@ export class GarmentEffectManager {
      */
     hideGarment(garmentModel, onComplete = null) {
         if (!garmentModel) return;
-        console.log('EFFECT: Hiding garment with', this.config.disappearEffect);
 
         this.stopAnimation(garmentModel);
 

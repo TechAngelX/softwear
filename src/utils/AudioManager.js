@@ -21,8 +21,6 @@ class AudioManager {
                 audio: audio,
                 individualVolume: volume || this.globalVolume
             });
-
-            console.log(`Audio "${name}" preloaded successfully`);
         } catch (error) {
             console.warn(`Failed to preload audio "${name}":`, error);
         }

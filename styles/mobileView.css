@@ -53,6 +53,37 @@
     z-index: 25;
 }
 
+/* Floating gesture-control toggle (mobile has no keyboard shortcut) */
+.mobile-gesture-toggle {
+    position: absolute;
+    top: calc(16px + env(safe-area-inset-top, 0));
+    left: calc(16px + env(safe-area-inset-left, 0));
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 30;
+    cursor: pointer;
+    opacity: 0.55;
+    transition: opacity 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-gesture-toggle.active {
+    opacity: 1;
+    border-color: rgba(3, 218, 198, 0.7);
+    box-shadow: 0 0 14px rgba(3, 218, 198, 0.5);
+}
+
 .gender-btn-mobile {
     flex: 1;
     max-width: 85px;

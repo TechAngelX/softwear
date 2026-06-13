@@ -50,9 +50,6 @@ export class HeadPoseMapper {
     }
 
     calculateAccessoryPosition(faceLandmarks, garmentDetails) {
-        console.log('Garment details:', garmentDetails);
-        console.log('Head type:', garmentDetails?.headType);
-        console.log('SMPLX data available:', !!this.smplxData);
         const leftEye = this.getLandmark(faceLandmarks, MEDIAPIPE_FACE_LANDMARKS.LEFT_EYE_OUTER);
         const rightEye = this.getLandmark(faceLandmarks, MEDIAPIPE_FACE_LANDMARKS.RIGHT_EYE_OUTER);
         const nose = this.getLandmark(faceLandmarks, MEDIAPIPE_FACE_LANDMARKS.NOSE_TIP);
@@ -71,20 +68,16 @@ export class HeadPoseMapper {
         }
 
         if (this.smplxData) {
-            console.log('Applying SMPLX adjustments');
             const headBone = this.smplxData.head;
             const headHeight = headBone.tail[2] - headBone.head[2];
             const eyeWidth = Math.abs(this.smplxData.left_eye_smplhf.head[0] - this.smplxData.right_eye_smplhf.head[0]);
 
             if (garmentDetails?.headType === 'glasses') {
-                console.log('Adjusting for glasses');
                 basePosition.x += eyeWidth * -2.2;
             } else if (garmentDetails?.headType === 'hat') {
-                console.log('Adjusting for hat');
                 const foreheadLevel = headHeight * 7.0;
                 basePosition.x += eyeWidth * -2.2;
                 basePosition.y += foreheadLevel * 0.2;
-                console.log('Hat adjustment applied:', foreheadLevel * 0.2);
             }
         }
 

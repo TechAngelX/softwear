@@ -152,3 +152,30 @@
         --border-light: 1px solid rgba(0, 0, 0, 0.3);
     }
 }
+
+/*
+ * Touch-target sizing (WCAG 2.5.5 / 2.5.8).
+ * On touch/coarse-pointer devices, ensure interactive controls are at
+ * least 44x44px so they are comfortably tappable.
+ */
+@media (pointer: coarse) {
+    .category-arrow-btn,
+    .category-pill,
+    .sidebar-garment-btn,
+    .btn-control,
+    .gender-toggle-btn,
+    .footer-privacy-link,
+    .privacy-link,
+    .background-cycle-btn,
+    .close-panel-btn,
+    .home-bar-btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    .category-arrow-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+}

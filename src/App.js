@@ -82,8 +82,8 @@ function AppContent() {
                 height: '100vh',
                 background: '#000',
                 color: 'white'
-            }}>
-                Loading...
+            }} role="status" aria-live="polite">
+                Loading…
             </div>
         );
     }
@@ -108,6 +108,7 @@ function AppContent() {
                 <div className="privacy-required-message">
                     <p>To continue, please review and accept our privacy policy.</p>
                     <button
+                        type="button"
                         className="btn-privacy-agree"
                         onClick={() => dispatch({ type: ACTIONS.SET_APP_STATE, payload: { showPrivacyModal: true } })}
                     >
@@ -124,8 +125,8 @@ function AppContent() {
 
     if (isMobileLayout && !deviceInfo.isPortrait) {
         return (
-            <div className="rotate-device-overlay">
-                <div className="rotate-device-icon"></div>
+            <div className="rotate-device-overlay" role="alert">
+                <div className="rotate-device-icon" aria-hidden="true"></div>
                 <p>Please rotate your device to portrait mode</p>
             </div>
         );
@@ -138,6 +139,7 @@ function AppContent() {
                 <footer className="app-footer">
                     <p>© 2025 TechAngelX for Birkbeck, University of London</p>
                     <button
+                        type="button"
                         className="footer-privacy-link"
                         onClick={handleFooterPrivacyClick}
                     >

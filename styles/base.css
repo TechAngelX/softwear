@@ -106,3 +106,57 @@ html.light-mode body {
             linear-gradient(90deg, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
     background-size: 24px 24px;
 }
+
+/* Screen-reader-only utility */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Top-level error boundary fallback */
+.app-error-boundary {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+    text-align: center;
+    background: var(--background);
+    color: var(--on-background);
+}
+
+.app-error-boundary h1 {
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+}
+
+.app-error-boundary p {
+    max-width: 40ch;
+    color: var(--gray-400);
+    margin-bottom: 24px;
+}
+
+.app-error-reload {
+    background: var(--primary);
+    color: var(--on-primary);
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 12px 28px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 44px;
+    transition: var(--transition);
+}
+
+.app-error-reload:hover {
+    background: var(--primary-dark);
+}

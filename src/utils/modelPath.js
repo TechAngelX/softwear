@@ -13,7 +13,7 @@
 
 /**
  * Resolves a garment object to its corresponding 3D model file path.
- * Automatically uses mobile-optimized versions (_mlb.glb) on mobile devices.
+ * Automatically uses mobile-optimized versions (_mob.glb) on mobile devices.
  * Falls back to placeholder if model not found.
  *
  * @param {Object} garment - Garment data object with a `modelPath` property.
